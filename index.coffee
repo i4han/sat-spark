@@ -60,8 +60,16 @@ exports.Modules = ->
             'keypress #[input0]': (e) =>
                 if e.keyCode == 13 and text = $(@id 'input0').val()
                     $(@id 'input0').val ''
-                    Meteor.call 'says', 'isaac', text 
-        collections: 'Chats'
+                    Meteor.call 'says', 'isaac', text
+        mongo:
+            chat:
+                collection: 'Chat'
+            user:
+                allow: insert: (-> false), update: (-> false), remove: (-> false)
+                publish: -> db.users.find location: $near: 
+                    $geometry: { type: "Point", coordinates: [ -118.3096648, 34.0655627 ] }, 
+                    $maxDistance: 10000
+                    $minDistance: 100
         helpers: chats: -> db.Chats.find {}
         methods: says: (id, text) -> db.Chats.insert id: id, text: text
 
