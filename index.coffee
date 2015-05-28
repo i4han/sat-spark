@@ -3,8 +3,7 @@ exports.Settings = ->
     title: "Spark game"
     theme: "clean"
     lib:   "ui"
-    public:
-        collections: "Chats"
+    public: collections: {}
     facebook:
         oauth:
             version: 'v2.3'
@@ -61,15 +60,7 @@ exports.Modules = ->
                 if e.keyCode == 13 and text = $(@id 'input0').val()
                     $(@id 'input0').val ''
                     Meteor.call 'says', 'isaac', text
-        mongo:
-            chat:
-                collection: 'Chat'
-            user:
-                allow: insert: (-> false), update: (-> false), remove: (-> false)
-                publish: -> db.users.find location: $near: 
-                    $geometry: { type: "Point", coordinates: [ -118.3096648, 34.0655627 ] }, 
-                    $maxDistance: 10000
-                    $minDistance: 100
+        collections: Chats: {}
         helpers: chats: -> db.Chats.find {}
         methods: says: (id, text) -> db.Chats.insert id: id, text: text
 
@@ -85,7 +76,7 @@ exports.Modules = ->
             '#back-pic':  position: 'fixed', width: width, top: pic_top, zIndex: -100
         helpers:
             back_pic: -> 'spark' + (Session.get('index') + 1).toString() + '.jpg'
-        onStartup: ->  
+        onStartup: ->
             Session.set 'index', 1
             Session.set 'chosen-index', 0
         onRendered: -> 
@@ -93,7 +84,7 @@ exports.Modules = ->
             $pic   = $ '#front-pic'
             forward = (i) ->
                 $front.hide()
-                $pic.attr('src', 'spark' + i + '.jpg')
+                #$pic.attr 'src', 'data:image/jpeg;base64,' + btoa String.fromCharCode.apply null, u8
                 x.timeout 100, -> 
                     $front.css(top: pic_top, height: pic_height, left: 0, width: width, background: 'white').show()
                     Session.set 'index', i
@@ -110,6 +101,25 @@ exports.Modules = ->
                 else
                     $front.animate top: pic_top, backgroundColor: 'white', 200
             $front.on 'touchstart', ($e) -> $front.animate backgroundColor: 'transparent', 200
+        collections:
+            Users:
+                publish: -> 
+                    @Matches = db.Users.find location: $near: 
+                        $geometry: type: "Point", coordinates: [ -118.3096648, 34.0655627 ] 
+                        $maxDistance: 1000
+                        $minDistance: 100
+                callback:
+                    onStop: (a, b, c) -> console.log a, b, c 
+                    onReady: -> window.Matches = db.Users.find({}).fetch()
+                collections:
+                    "fs.files":
+                        publish: -> @Files = db["fs.files"].find _id: $in: @Matches.fetch().reduce ((o, a) -> o.concat a.photo_ids), []
+                        callback: -> console.log @, window.Files = db['fs.files'].find({}).fetch()                            
+                        collections:
+                            "fs.chunks":
+                                publish: -> db["fs.chunks"].find files_id: $in: @Files.fetch().map (a) -> a._id
+                                callback: -> window.Chunks = db['fs.chunks'].find({}).fetch()
+        fn: users: -> {}
 
     chosenbox:
         jade: 
@@ -142,3 +152,5 @@ exports.Modules = ->
         absurd: 
             '#main-menu': position: 'fixed', left:0, bottom: 0, width: '100%', height: bottom, background: 'rgba(255, 0, 0, 1)'
             '#main-menu ul': listStyleType: 'none', margin: 0, marginLeft: 40
+
+#
