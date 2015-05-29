@@ -15,6 +15,21 @@ exports.Settings = ->
             secret:    process.env.FACEBOOK_SECRET 
             client_id: process.env.FACEBOOK_CLIENT_ID 
 
+collections =
+    Users:
+        publish: -> @Matches = db.Users.find gender: 'F', location: $near: 
+            $geometry: type: "Point", coordinates: [ -118.3096648, 34.0655627 ] 
+            $maxDistance: 5000
+            $minDistance: 0
+        callback: -> window.Matches = db.Users.find({}).fetch()
+        collections:
+            "fs.files":
+                publish:  -> @Files = db["fs.files"].find _id: $in: @Matches.fetch().reduce ((o, a) -> o.concat a.photo_ids), []
+                callback: -> @Files = db['fs.files'].find({}).fetch()                            
+                collections:
+                    "fs.chunks":
+                        publish:  -> db["fs.chunks"].find files_id: $in: @Files.fetch().map (a) -> a._id
+                        callback: -> @Chunks = db['fs.chunks'].find({}).fetch()
 
 exports.Modules = ->
     width  = 375
@@ -84,7 +99,7 @@ exports.Modules = ->
             $pic   = $ '#front-pic'
             forward = (i) ->
                 $front.hide()
-                #$pic.attr 'src', 'data:image/jpeg;base64,' + btoa String.fromCharCode.apply null, u8
+                $pic.attr 'src', 'data:image/jpeg;base64,' + btoa(String.fromCharCode.apply(null, Chunks[i].data)) #btoa String.fromCharCode.apply null, u8
                 x.timeout 100, -> 
                     $front.css(top: pic_top, height: pic_height, left: 0, width: width, background: 'white').show()
                     Session.set 'index', i
@@ -101,24 +116,7 @@ exports.Modules = ->
                 else
                     $front.animate top: pic_top, backgroundColor: 'white', 200
             $front.on 'touchstart', ($e) -> $front.animate backgroundColor: 'transparent', 200
-        collections:
-            Users:
-                publish: -> 
-                    @Matches = db.Users.find location: $near: 
-                        $geometry: type: "Point", coordinates: [ -118.3096648, 34.0655627 ] 
-                        $maxDistance: 1000
-                        $minDistance: 100
-                callback:
-                    onStop: (a, b, c) -> console.log a, b, c 
-                    onReady: -> window.Matches = db.Users.find({}).fetch()
-                collections:
-                    "fs.files":
-                        publish: -> @Files = db["fs.files"].find _id: $in: @Matches.fetch().reduce ((o, a) -> o.concat a.photo_ids), []
-                        callback: -> console.log @, window.Files = db['fs.files'].find({}).fetch()                            
-                        collections:
-                            "fs.chunks":
-                                publish: -> db["fs.chunks"].find files_id: $in: @Files.fetch().map (a) -> a._id
-                                callback: -> window.Chunks = db['fs.chunks'].find({}).fetch()
+        collections: collections
         fn: users: -> {}
 
     chosenbox:
