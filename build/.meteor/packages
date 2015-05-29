@@ -1,0 +1,18 @@
+# Meteor packages used by this project, one per line.
+# Check this file (and the other files in this directory) into your repository.
+#
+# 'meteor add' and 'meteor remove' will edit this file for you,
+# but you can also edit it by hand.
+
+meteor-platform
+stylus
+mquandalle:jade
+mizzao:jquery-ui
+mizzao:bootstrap-3
+jquery
+isaac:cubesat@0.4.9
+iron:router
+http
+fortawesome:fontawesome
+accounts-password
+service-configuration
