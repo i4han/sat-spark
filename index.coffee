@@ -20,16 +20,17 @@ exports.Settings = ->
          secret:    process.env.FACEBOOK_SECRET 
          client_id: process.env.FACEBOOK_CLIENT_ID 
 
-collections =
+collections = ->
    Users:
       publish: -> @Matches = db.Users.find gender: 'F', public_ids: {$exists: true}, location: $near: 
          $geometry: type: "Point", coordinates: [ -118.3096648, 34.0655627 ] 
          $maxDistance: 20000
          $minDistance: 0
       callback: -> 
+         console.log 'callback', @
          window.Matches = db.Users.find({}).fetch()
          Session.set 'MatchLoaded', true
-         $('#front-pic').attr 'src', Settings.image_url + Matches[1].public_ids[0] + '.jpg'
+         Modules.home.fn.forward 1
       collections:
          "fs.files":
             publish:  -> @Files = db["fs.files"].find _id: $in: @Matches.fetch().reduce ((o, a) -> o.concat a.photo_ids), []
@@ -54,7 +55,7 @@ exports.Modules = ->
       jade: ['+chosen', '+yield', '+nav']
       head: ["meta(name='viewport' content='width=device-width initial-scale=1.0, user-scalable=no')"]
    login:
-      router: path: '/'
+      router: path: 'login'
       jade: 'button#facebook-login(class="btn btn-default")': 'login with facebook'
       onServerStartup: ->
          ServiceConfiguration.configurations.remove service: 'facebook'
@@ -79,7 +80,7 @@ exports.Modules = ->
             container0: [
                each chats: _line: value 'text'
                photo0: IMG image0: src: 'spark1.jpg' ]
-            INPUT input0: type:'text' ]
+            INPUT input0: type: 'text' ]
 
       absurd:
          container0: position: 'fixed', bottom: bottom * 2
@@ -97,53 +98,52 @@ exports.Modules = ->
       methods: says: (id, text) -> db.Chats.insert id: id, text: text
 
    home: ->
-      getImage = (i) -> Settings.image_url + Matches[i].public_ids[0] + '.jpg'
-      router: path: 'home'
-      jade: 
-         '#front-container': 
-            'img(id="front-pic" src="spark1.jpg")': ''
-         'img(id="back-pic")': ''      
+      getImage = (id, i) -> '<img style="width: inherit;" id=' + id + ' src=' + Settings.image_url + Matches[i].public_ids[0] + '.jpg>'
+      router: path: '/'
+      jade: ['front0', 'back0']
       absurd: 
-         '#front-container': position: 'fixed', width: width, height: pic_height, top: pic_top, background: 'white', zIndex: 1000, overflowY: 'hidden'
-         '#front-pic': position: 'fixed', width: 'inherit'
-         '#back-pic':  position: 'fixed', width: width, top: pic_top, zIndex: -100
+         front0: position: 'fixed', width: width, top: pic_top, height: pic_height, zIndex: 1000, background: 'white',  overflowY: 'hidden'
+         back0:  position: 'fixed', width: width, top: pic_top, height: pic_height, zIndex: -100
+         '#front-pic': width: 'inherit'
+         '#back-pic':  width: 'inherit'
       onStartup: ->
          Session.set 'index', 1
          Session.set 'chosen-index', 0
       onRendered: -> 
-         $front = $ '#front-container'
-         $back  = $ '#back-pic'
-         $pic   = $ '#front-pic'
-         forward = (i) ->
-            $front.hide()
-            $pic .attr 'src', getImage i
-            $back.attr 'src', getImage i + 1
-            x.timeout 100, -> 
-               $front.css(top: pic_top, height: pic_height, left: 0, width: width, background: 'white').show()
-               Session.set 'index', i
-         $front.draggable(axis:'y').on 'touchend', ($e) ->
+         @fn.init()
+         @Front.draggable(axis:'y').on 'touchend', ($e) =>
             if $e.target.y > pic_top + swipe
-               $front.animate top: '+=2500', 500, -> forward Session.get('index') + 1
+               @Front.animate top: '+=2500', 500, => @fn.forward Session.get('index') + 1
             else if $e.target.y < pic_top - swipe
                index = Session.get('index')
                chosen_index = Session.get('chosen-index')
                Session.set 'chosen-index', chosen_index + 1
-               $front.animate top: top, left: box * chosen_index, width: box, height: box, 500, ->
-                  $('#chosen-box-' + chosen_index.toString()).attr 'src', getImage index 
-                  forward index + 1
+               @Front.animate top: top, left: box * chosen_index, width: box, height: box, 500, =>
+                  $('#chosen-' + chosen_index.toString()).html getImage 'chosen-box-' + index, index
+                  @fn.forward index + 1
             else
-               $front.animate top: pic_top, backgroundColor: 'white', 200
-         $front.on 'touchstart', ($e) -> $front.animate backgroundColor: 'transparent', 200
-      collections: collections
-      fn: users: -> {}
+               @Front.animate top: pic_top, backgroundColor: 'white', 200
+         @Front.on 'touchstart', ($e) => @Front.animate backgroundColor: 'transparent', 200
+      collections: -> collections.call @
+      fn: ->
+         init: =>
+            @Front or @Front = $ @id 'front0'
+            @Back  or @Back  = $ @id 'back0'            
+         forward: (i) =>
+            @fn.init()
+            @Front.hide()
+            x.timeout 100, => 
+               @Front.html getImage 'front-pic', i 
+               @Back .html getImage 'back-pic',  i + 1
+               @Front.css(top: pic_top, height: pic_height, left: 0, width: width, background: 'white').show()
+               Session.set 'index', i
+
 
    chosenbox:
-      jade: 
-         '.chosen-container(style="left:{{left}}px;")': 
-            'img(class="chosen-box" id="chosen-box-{{id}}") ': ''
+      jade: '.chosen-container(id="chosen-{{id}}" style="left:{{left}}px;")'
+      #      'img(class="chosen-box" id="chosen-box-{{id}}") ': ''
       absurd:
          _chosenContainer: position: 'fixed', zIndex: 200, top: top, border: 3, width: box, height: box, overflowY: 'hidden'
-         _chosenBox:  width: box, background: 'rgba(255, 0, 0, 0.7)'
 
    chosen:
       jade: $chosen: 'each chosen': '+chosenbox': ''
@@ -155,7 +155,7 @@ exports.Modules = ->
 
    menu_list:
       jade: li: 'a.main-menu(id="menu-toggle-{{id}}" href="{{path}}"):': 'i.fa(class="fa-{{icon}}")'
-      helpers: path: -> ['/chat', '/home', '/setting'][@id]
+      helpers: path: -> ['/chat', '/', '/setting'][@id]
       absurd: 
          '#main-menu ul li': display: 'inline-block', width: bottom * 1.5
          '.main-menu': display: 'inline-block', width: bottom * 1.5, color: 'white', padding: 12, textAlign: 'center'
