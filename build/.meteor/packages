@@ -10,7 +10,7 @@ mquandalle:jade
 mizzao:jquery-ui
 mizzao:bootstrap-3
 jquery
-isaac:cubesat@0.4.9
+isaac:cubesat@0.4.13
 iron:router
 http
 fortawesome:fontawesome
