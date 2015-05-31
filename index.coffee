@@ -54,6 +54,7 @@ exports.Modules = ->
    layout: 
       jade: ['+chosen', '+yield', '+nav']
       head: ["meta(name='viewport' content='width=device-width initial-scale=1.0, user-scalable=no')"]
+
    login:
       router: path: 'login'
       jade: 'button#facebook-login(class="btn btn-default")': 'login with facebook'
@@ -72,16 +73,18 @@ exports.Modules = ->
          wrapper0:
             container0: 
                'each chats': line0: '{{text}}'
-               photo0: 'img#[image0](src="spark1.jpg")': ' '
+               photo0: 'img#[image0](src="{{photo}}")': ' '
             'input#[input0](type="text")': ''
-
+      helpers: 
+         chats: -> db.Chats.find {}
+         photo: -> "spark1.jpg"
       template: -> 
          wrapper0: [
             container0: [
-               each chats: _line: value 'text'
-               photo0: IMG image0: src: 'spark1.jpg' ]
+               add 'img'
+               each chats: _line: v 'text'
+               photo0: IMG image0: src: v 'photo' ]
             INPUT input0: type: 'text' ]
-
       absurd:
          container0: position: 'fixed', bottom: bottom * 2
          _line:      display: 'block'
@@ -93,14 +96,27 @@ exports.Modules = ->
             if e.keyCode == 13 and text = $(@id 'input0').val()
                $(@id 'input0').val ''
                Meteor.call 'says', 'isaac', text
-      collections: Chats: {}
-      helpers: chats: -> db.Chats.find {}
       methods: says: (id, text) -> db.Chats.insert id: id, text: text
+      collections: Chats: {}
+
+   front_img:
+      jade: "img(id='front-pic' src='{{src}}')"
+      helpers: src: -> 
+         if Session.get('front-pic-id') then Settings.image_url + Session.get('front-pic-id') + '.jpg' else 'spark1.jpg'
+
+   back_img:
+      jade: "img(id='back-pic'  src='{{src}}')"
+      helpers: src: -> 
+         if Session.get('back-pic-id' ) then Settings.image_url + Session.get('back-pic-id' ) + '.jpg' else 'spark2.jpg'
 
    home: ->
-      getImage = (id, i) -> '<img style="width: inherit;" id=' + id + ' src=' + Settings.image_url + Matches[i].public_ids[0] + '.jpg>'
+      setImage = (id, i) -> 
+         Session.set 'img-id', id
+         Session.set 'img-photo-id', Matches[i].public_ids[0]
       router: path: '/'
-      jade: ['front0', 'back0']
+      jade: 
+         front0: '+front_img': ''
+         back0:  '+back_img': ''
       absurd: 
          front0: position: 'fixed', width: width, top: pic_top, height: pic_height, zIndex: 1000, background: 'white',  overflowY: 'hidden'
          back0:  position: 'fixed', width: width, top: pic_top, height: pic_height, zIndex: -100
@@ -119,7 +135,7 @@ exports.Modules = ->
                chosen_index = Session.get('chosen-index')
                Session.set 'chosen-index', chosen_index + 1
                @Front.animate top: top, left: box * chosen_index, width: box, height: box, 500, =>
-                  $('#chosen-' + chosen_index.toString()).html getImage 'chosen-box-' + index, index
+                  $('#chosen-box-' + chosen_index.toString()).removeAttr('src').attr 'src', @fn.getImage index
                   @fn.forward index + 1
             else
                @Front.animate top: pic_top, backgroundColor: 'white', 200
@@ -128,22 +144,27 @@ exports.Modules = ->
       fn: ->
          init: =>
             @Front or @Front = $ @id 'front0'
-            @Back  or @Back  = $ @id 'back0'            
+            @Back  or @Back  = $ @id 'back0'  
+         getImage: (i) => 
+            Settings.image_url + Matches[i].public_ids[0] + '.jpg?' + (new Date()).getTime()           
          forward: (i) =>
             @fn.init()
             @Front.hide()
+            $('#front-pic').removeAttr('src').attr 'src', @fn.getImage i            
+            $('#back-pic') .removeAttr('src').attr 'src', @fn.getImage i + 1
             x.timeout 100, => 
-               @Front.html getImage 'front-pic', i 
-               @Back .html getImage 'back-pic',  i + 1
                @Front.css(top: pic_top, height: pic_height, left: 0, width: width, background: 'white').show()
                Session.set 'index', i
-
+         urlPhoto: (i) => Settings.image_url + Matches[i].public_ids[0] + '.jpg'
+         getPhoto: (s, url) =>
+            console.log 'url', url
+            HTTP.get url, (e, data) -> 
+               console.log data
+               Session.set s, data
 
    chosenbox:
-      jade: '.chosen-container(id="chosen-{{id}}" style="left:{{left}}px;")'
-      #      'img(class="chosen-box" id="chosen-box-{{id}}") ': ''
-      absurd:
-         _chosenContainer: position: 'fixed', zIndex: 200, top: top, border: 3, width: box, height: box, overflowY: 'hidden'
+      jade: '.chosen-container(id="chosen-{{id}}" style="left:{{left}}px;")': ['img(id="chosen-box-{{id}}")']
+      absurd: _chosenContainer: position: 'fixed', zIndex: 200, top: top, border: 3, width: box, height: box, overflowY: 'hidden'
 
    chosen:
       jade: $chosen: 'each chosen': '+chosenbox': ''
