@@ -99,29 +99,19 @@ exports.Modules = ->
       methods: says: (id, text) -> db.Chats.insert id: id, text: text
       collections: Chats: {}
 
-   front_img:
-      jade: "img(id='front-pic' src='{{src}}')"
-      helpers: src: -> 
-         if Session.get('front-pic-id') then Settings.image_url + Session.get('front-pic-id') + '.jpg' else 'spark1.jpg'
-
-   back_img:
-      jade: "img(id='back-pic'  src='{{src}}')"
-      helpers: src: -> 
-         if Session.get('back-pic-id' ) then Settings.image_url + Session.get('back-pic-id' ) + '.jpg' else 'spark2.jpg'
-
    home: ->
       setImage = (id, i) -> 
          Session.set 'img-id', id
          Session.set 'img-photo-id', Matches[i].public_ids[0]
       router: path: '/'
       jade: 
-         front0: '+front_img': ''
-         back0:  '+back_img': ''
+         front0: 'img(id="front-pic")': ''
+         back0:  'img(id="back-pic")': ''
       absurd: 
          front0: position: 'fixed', width: width, top: pic_top, height: pic_height, zIndex: 1000, background: 'white',  overflowY: 'hidden'
          back0:  position: 'fixed', width: width, top: pic_top, height: pic_height, zIndex: -100
-         '#front-pic': width: 'inherit'
-         '#back-pic':  width: 'inherit'
+         '#front-pic': width: 'inherit', zIndex: 100
+         '#back-pic':  width: 'inherit', zIndex: -200
       onStartup: ->
          Session.set 'index', 1
          Session.set 'chosen-index', 0
