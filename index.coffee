@@ -30,7 +30,8 @@ collections = ->
          console.log 'callback', @
          window.Matches = db.Users.find({}).fetch()
          Session.set 'MatchLoaded', true
-         Modules.home.fn.forward 1
+         console.log Matches[1]
+         @fn.getPhoto '#front-pic', 1
       collections:
          "fs.files":
             publish:  -> @Files = db["fs.files"].find _id: $in: @Matches.fetch().reduce ((o, a) -> o.concat a.photo_ids), []
@@ -39,7 +40,6 @@ collections = ->
                "fs.chunks":
                   publish:  -> db["fs.chunks"].find files_id: $in: @Files.fetch().map (a) -> a._id
                   callback: -> @Chunks = db['fs.chunks'].find({}).fetch()
-
 
 exports.Modules = ->
    width  = 375
@@ -125,7 +125,8 @@ exports.Modules = ->
                chosen_index = Session.get('chosen-index')
                Session.set 'chosen-index', chosen_index + 1
                @Front.animate top: top, left: box * chosen_index, width: box, height: box, 500, =>
-                  $('#chosen-box-' + chosen_index.toString()).removeAttr('src').attr 'src', @fn.getImage index
+                  @fn.getPhoto '#chosen-box-' + chosen_index.toString(), index
+                  #$('#chosen-box-' + chosen_index.toString()).removeAttr('src').attr 'src', @fn.getImage index
                   @fn.forward index + 1
             else
                @Front.animate top: pic_top, backgroundColor: 'white', 200
@@ -134,23 +135,23 @@ exports.Modules = ->
       fn: ->
          init: =>
             @Front or @Front = $ @id 'front0'
-            @Back  or @Back  = $ @id 'back0'  
-         getImage: (i) => 
-            Settings.image_url + Matches[i].public_ids[0] + '.jpg?' + (new Date()).getTime()           
+            @Back  or @Back  = $ @id 'back0'
+         getUrl: (i) => Settings.image_url + Matches[i].public_ids[0] + '.jpg?'
+         getImage: (i) =>             
+            #'spark' + i + '.jpg'
+            'data:image/gif;base64,' + Session.get 'front-pic'
          forward: (i) =>
             @fn.init()
             @Front.hide()
-            $('#front-pic').removeAttr('src').attr 'src', @fn.getImage i            
-            $('#back-pic') .removeAttr('src').attr 'src', @fn.getImage i + 1
+            @fn.getPhoto '#front-pic', i
+            @fn.getPhoto '#back-pic', i + 1
             x.timeout 100, => 
                @Front.css(top: pic_top, height: pic_height, left: 0, width: width, background: 'white').show()
                Session.set 'index', i
-         urlPhoto: (i) => Settings.image_url + Matches[i].public_ids[0] + '.jpg'
-         getPhoto: (s, url) =>
-            console.log 'url', url
-            HTTP.get url, (e, data) -> 
-               console.log data
-               Session.set s, data
+         getPhoto: (id, i) =>
+            HTTP.get Settings.image_url + Matches[i].public_ids[0] + '.jpg', (e, data) -> 
+               console.log 'get', id, data,
+               $(id).removeAttr('src').attr 'src', 'data:image/jpeg;base64,' + btoa data.content
 
    chosenbox:
       jade: '.chosen-container(id="chosen-{{id}}" style="left:{{left}}px;")': ['img(id="chosen-box-{{id}}")']
