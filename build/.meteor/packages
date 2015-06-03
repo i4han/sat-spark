@@ -10,9 +10,9 @@ mquandalle:jade
 mizzao:jquery-ui
 mizzao:bootstrap-3
 jquery
-isaac:cubesat@0.4.17
 iron:router
 http
 fortawesome:fontawesome
 accounts-password
 service-configuration
+isaac:cubesat@0.4.19

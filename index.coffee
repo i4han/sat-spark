@@ -31,7 +31,6 @@ collections = ->
          window.Matches = db.Users.find({}).fetch()
          Session.set 'MatchLoaded', true
          console.log Matches[1]
-         @fn.getPhoto '#front-pic', 1
       collections:
          "fs.files":
             publish:  -> @Files = db["fs.files"].find _id: $in: @Matches.fetch().reduce ((o, a) -> o.concat a.photo_ids), []
@@ -82,10 +81,10 @@ exports.Modules = ->
          wrapper0: [
             container0: [
                add 'img'
-               each chats: _line: v 'text'
+               each 'chats', _line: v 'text'
                photo0: IMG image0: src: v 'photo' ]
             INPUT input0: type: 'text' ]
-      absurd:
+      style:
          container0: position: 'fixed', bottom: bottom * 2
          _line:      display: 'block'
          input0:     position: 'fixed', bottom: bottom, width: width, height: bottom
@@ -93,69 +92,52 @@ exports.Modules = ->
          photo0:     position: 'fixed', bottom: bottom + 5, right: 5, width: 100
       events: ->
          'keypress #[input0]': (e) =>
-            if e.keyCode == 13 and text = $(@id 'input0').val()
-               $(@id 'input0').val ''
+            if e.keyCode == 13 and text = $(@Id '#input0').val()
+               $(@Id '#input0').val ''
                Meteor.call 'says', 'isaac', text
       methods: says: (id, text) -> db.Chats.insert id: id, text: text
       collections: Chats: {}
 
    home: ->
-      setImage = (id, i) -> 
-         Session.set 'img-id', id
-         Session.set 'img-photo-id', Matches[i].public_ids[0]
+      icon_index = 0
+      setImage = (id, i) -> Session.set 'img-photo-id', Matches[i].public_ids[0] # Settings.image_url 'data:image/gif;base64,'
+      pass   = ($s) -> $s.animate top: '+=1000', 500, -> $s.remove()
+      choose = ($s) -> $s.animate top: top, width: box, left: box * icon_index++, clip: 'rect(0px, 75px, 75px, 0px)', 500, -> $s.switchClass 'touched', 'icon', 300
+      push   = (i) =>
+         loaded = true
+         $front = $('#photo-' + i)
+         $front
+            .switchClass 'back', 'front', 0, -> $('#photo-' + (i + 1)).css left: 0
+            .after "<img id=photo-#{i + 1} class=\"back photo\" src=spark#{i + 1}.jpg>"
+            .draggable axis: 'y'
+            .on 'touchstart', (e) -> $front.switchClass 'front', 'touched', 100
+            .on 'touchend',   (e) -> switch
+               when e.target.y > pic_top + swipe then push(i + 1) and pass   $front
+               when e.target.y < pic_top - swipe then push(i + 1) and choose $front
+               else $front.switchClass 'touched', 'front', 100, ->  $front.animate top: pic_top, 100
+
+
       router: path: '/'
-      jade: 
-         front0: 'img(id="front-pic")': ''
-         back0:  'img(id="back-pic")': ''
-      absurd: 
-         front0: position: 'fixed', width: width, top: pic_top, height: pic_height, zIndex: 1000, background: 'white',  overflowY: 'hidden'
-         back0:  position: 'fixed', width: width, top: pic_top, height: pic_height, zIndex: -100
-         '#front-pic': width: 'inherit', zIndex: 100
-         '#back-pic':  width: 'inherit', zIndex: -200
-      onStartup: ->
-         Session.set 'index', 1
-         Session.set 'chosen-index', 0
-      onRendered: -> 
-         @fn.init()
-         @Front.draggable(axis:'y').on 'touchend', ($e) =>
-            if $e.target.y > pic_top + swipe
-               @Front.animate top: '+=2500', 500, => @fn.forward Session.get('index') + 1
-            else if $e.target.y < pic_top - swipe
-               index = Session.get('index')
-               chosen_index = Session.get('chosen-index')
-               Session.set 'chosen-index', chosen_index + 1
-               @Front.animate top: top, left: box * chosen_index, width: box, height: box, 500, =>
-                  @fn.getPhoto '#chosen-box-' + chosen_index.toString(), index
-                  #$('#chosen-box-' + chosen_index.toString()).removeAttr('src').attr 'src', @fn.getImage index
-                  @fn.forward index + 1
-            else
-               @Front.animate top: pic_top, backgroundColor: 'white', 200
-         @Front.on 'touchstart', ($e) => @Front.animate backgroundColor: 'transparent', 200
+      jade: ['img(id="photo-0" class="back photo" src="spark0.jpg")']
+      style:
+         _photo: position: 'fixed', width: width, top: pic_top, background: 'white', overflow: 'hidden'
+         _icon:  zIndex:  20, width: box, top: top, clip: 'rect(0px, 75px, 75px, 0px)'
+         _front: zIndex:  10, top: pic_top  
+         _back:  zIndex: -10, left: width
+         _touched: zIndex: 30, width: width - 1, background: 'white', borderRadius: 2, padding: '8px 6px', boxShadow: '1px 1px 5px 1px'
+      onRendered:  -> push(0)
       collections: -> collections.call @
-      fn: ->
-         init: =>
-            @Front or @Front = $ @id 'front0'
-            @Back  or @Back  = $ @id 'back0'
-         getUrl: (i) => Settings.image_url + Matches[i].public_ids[0] + '.jpg?'
-         getImage: (i) =>             
-            #'spark' + i + '.jpg'
-            'data:image/gif;base64,' + Session.get 'front-pic'
-         forward: (i) =>
-            @fn.init()
-            @Front.hide()
-            @fn.getPhoto '#front-pic', i
-            @fn.getPhoto '#back-pic', i + 1
-            x.timeout 100, => 
-               @Front.css(top: pic_top, height: pic_height, left: 0, width: width, background: 'white').show()
-               Session.set 'index', i
-         getPhoto: (id, i) =>
-            HTTP.get Settings.image_url + Matches[i].public_ids[0] + '.jpg', (e, data) -> 
-               console.log 'get', id, data,
-               $(id).removeAttr('src').attr 'src', 'data:image/jpeg;base64,' + btoa data.content
+
+   camera:
+      router: path: '/camera'
+      jade: h1: 'Camera'     
+      _onDeviceReady: -> true
+         #console.log navigator.camera
+         #navigator.camera.getPicture (->), (->)
 
    chosenbox:
       jade: '.chosen-container(id="chosen-{{id}}" style="left:{{left}}px;")': ['img(id="chosen-box-{{id}}")']
-      absurd: _chosenContainer: position: 'fixed', zIndex: 200, top: top, border: 3, width: box, height: box, overflowY: 'hidden'
+      style: _chosenContainer: position: 'fixed', zIndex: 200, top: top, border: 3, width: box, height: box, overflowY: 'hidden'
 
    chosen:
       jade: $chosen: 'each chosen': '+chosenbox': ''
@@ -166,19 +148,19 @@ exports.Modules = ->
       jade: h2: 'Settings'
 
    menu_list:
-      jade: li: 'a.main-menu(id="menu-toggle-{{id}}" href="{{path}}"):': 'i.fa(class="fa-{{icon}}")'
-      helpers: path: -> ['/chat', '/', '/setting'][@id]
-      absurd: 
+      jade: li: 'a.main-menu(id="menu-toggle-{{id}}" href="{{path}}"):': 'i.fa(class="fa-{{icon}} fa-lg")'
+      helpers: path: -> ['/chat', '/camera', '/', '/setting'][@id]
+      style: 
          '#main-menu ul li': display: 'inline-block', width: bottom * 1.5
-         '.main-menu': display: 'inline-block', width: bottom * 1.5, color: 'white', padding: 12, textAlign: 'center'
+         '.main-menu': display: 'inline-block', zIndex: 20, width: bottom * 1.5, color: 'white', padding: 6, textAlign: 'center'
          '.main-menu:hover': backgroundColor: 'rgba(255, 128, 128, 1)'
          '.main-menu:focus': backgroundColor: 'white'
 
    nav:
       jade: '#main-menu': ul: 'each menu': '+menu_list': ''
-      helpers: menu: -> [{id:0, icon: 'comment'}, {id:1, icon: 'bolt'}, {id:2, icon: 'gear'}]         
-      absurd: 
-         '#main-menu': position: 'fixed', left:0, bottom: 0, width: '100%', height: bottom, background: 'rgba(255, 0, 0, 1)'
+      helpers: menu: -> [{id:0, icon: 'comment'}, {id:1, icon: 'camera'},  {id:2, icon: 'bolt'}, {id:3, icon: 'gear'}]         
+      style: 
+         '#main-menu': position: 'fixed', zIndex: 20, left:0, bottom: 0, width: '100%', height: bottom, background: 'rgba(255, 0, 0, 1)'
          '#main-menu ul': listStyleType: 'none', margin: 0, marginLeft: 40
 
 #
