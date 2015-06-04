@@ -15,4 +15,5 @@ http
 fortawesome:fontawesome
 accounts-password
 service-configuration
-isaac:cubesat@0.4.19
+isaac:cubesat@0.4.20
+mdg:camera

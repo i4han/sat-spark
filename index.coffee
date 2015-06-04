@@ -1,6 +1,6 @@
 
 exports.Settings = ->
-   title: "Spark game"
+   title: "Spark game."
    theme: "clean"
    lib:   "ui"
    public: 
@@ -101,7 +101,7 @@ exports.Modules = ->
    home: ->
       icon_index = 0
       setImage = (id, i) -> Session.set 'img-photo-id', Matches[i].public_ids[0] # Settings.image_url 'data:image/gif;base64,'
-      pass   = ($s) -> $s.animate top: '+=1000', 500, -> $s.remove()
+      pass   = ($s) -> $s.animate top: '+=1000', 600, -> $s.remove()
       choose = ($s) -> $s.animate top: top, width: box, left: box * icon_index++, clip: 'rect(0px, 75px, 75px, 0px)', 500, -> $s.switchClass 'touched', 'icon', 300
       push   = (i) =>
          loaded = true
@@ -128,12 +128,14 @@ exports.Modules = ->
       onRendered:  -> push(0)
       collections: -> collections.call @
 
-   camera:
+   camerao:
       router: path: '/camera'
-      jade: h1: 'Camera'     
-      _onDeviceReady: -> true
-         #console.log navigator.camera
-         #navigator.camera.getPicture (->), (->)
+      jade: 
+         location0: '{{loca}}'
+         '+camera': ''     
+      helpers: loca: -> navigator.geolocation.getCurrentPosition (pos)-> Session.set 'location', pos
+      onRendered: ->
+         #MeteorCamera.getPicture (->), (->)
 
    chosenbox:
       jade: '.chosen-container(id="chosen-{{id}}" style="left:{{left}}px;")': ['img(id="chosen-box-{{id}}")']
