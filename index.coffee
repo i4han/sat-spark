@@ -29,7 +29,6 @@ collections = ->
       callback: -> 
          console.log 'callback', @
          window.Matches = db.Users.find({}).fetch()
-         Session.set 'MatchLoaded', true
          console.log Matches[1]
       collections:
          "fs.files":
@@ -106,9 +105,10 @@ exports.Modules = ->
       push   = (i) =>
          loaded = true
          $front = $('#photo-' + i)
+         photo = Settings.image_url + Matches[i].public_ids[0]
          $front
             .switchClass 'back', 'front', 0, -> $('#photo-' + (i + 1)).css left: 0
-            .after "<img id=photo-#{i + 1} class=\"back photo\" src=spark#{i + 1}.jpg>"
+            .after "<img id=photo-#{i + 1} class=\"back photo\" src=#{photo}.jpg>"
             .draggable axis: 'y'
             .on 'touchstart', (e) -> $front.switchClass 'front', 'touched', 100
             .on 'touchend',   (e) -> switch
