@@ -1,24 +1,4 @@
 
-exports.Settings = ->
-   title: "Spark game."
-   theme: "clean"
-   lib:   "ui"
-   public: 
-      collections: {}
-      image_url: "http://res.cloudinary.com/sparks/image/upload/"
-   cloudinary:
-      cloud_name: "sparks"
-      api_key: process.env.CLOUDINARY_API_KEY
-   facebook:
-      oauth:
-         version: 'v2.3'
-         url: "https://www.facebook.com/dialog/oauth"
-         options:
-            query:
-               client_id: process.env.FACEBOOK_CLIENT_ID 
-               redirect_uri: 'http://localhost:3000/home'
-         secret:    process.env.FACEBOOK_SECRET 
-         client_id: process.env.FACEBOOK_CLIENT_ID 
 
 collections = ->
    Users:
@@ -164,5 +144,45 @@ exports.Modules = ->
       style: 
          '#main-menu': position: 'fixed', zIndex: 20, left:0, bottom: 0, width: '100%', height: bottom, background: 'rgba(255, 0, 0, 1)'
          '#main-menu ul': listStyleType: 'none', margin: 0, marginLeft: 40
+
+
+exports.Settings = ->
+   app:
+      info:
+         id: 'com.spark.game'
+         name: 'Spark game'
+         description: 'Spark game long name.'
+         website: 'http://sparkgame.com'
+      icons:
+         iphone:    'resources/icons/icon-60x60.png'
+         iphone_2x: 'resources/icons/icon-60x60@2x.png'
+      setPreference:
+         BackgroundColor: '0xff0000ff'
+         HideKeyboardFormAccessoryBar: true
+      configurePlugin:
+         'com.phonegap.plugins.facebookconnect':
+            APP_ID:  process.env.FACEBOOK_CLIENT_ID
+            API_KEY: process.env.FACEBOOK_SECRET
+      accessRule: [
+         'http://res.cloudinary.com/*']
+
+   theme: "clean"
+   lib:   "ui"
+   public: 
+      collections: {}
+      image_url: "http://res.cloudinary.com/sparks/image/upload/"
+   cloudinary:
+      cloud_name: "sparks"
+      api_key: process.env.CLOUDINARY_API_KEY
+   facebook:
+      oauth:
+         version: 'v2.3'
+         url: "https://www.facebook.com/dialog/oauth"
+         options:
+            query:
+               client_id: process.env.FACEBOOK_CLIENT_ID 
+               redirect_uri: 'http://localhost:3000/home'
+         secret:    process.env.FACEBOOK_SECRET 
+         client_id: process.env.FACEBOOK_CLIENT_ID 
 
 #
