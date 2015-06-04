@@ -165,7 +165,7 @@ exports.Settings = ->
             API_KEY: process.env.FACEBOOK_SECRET
       accessRule: [
          'http://res.cloudinary.com/*']
-
+   title: -> @app.info.name
    theme: "clean"
    lib:   "ui"
    public: 
