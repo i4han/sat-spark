@@ -7,9 +7,8 @@ collections = ->
          $maxDistance: 20000
          $minDistance: 0
       callback: -> 
-         console.log 'callback', @
          window.Matches = db.Users.find({}).fetch()
-         console.log Matches[1]
+         @UserReady()
       collections:
          "fs.files":
             publish:  -> @Files = db["fs.files"].find _id: $in: @Matches.fetch().reduce ((o, a) -> o.concat a.photo_ids), []
@@ -51,33 +50,34 @@ exports.Modules = ->
          wrapper0:
             container0: 
                'each chats': line0: '{{text}}'
-               photo0: 'img#[image0](src="{{photo}}")': ' '
+               photo0: 'img[#image0](src="{{photo}}")': ' '
             'input#[input0](type="text")': ''
-      helpers: 
-         chats: -> db.Chats.find {}
-         photo: -> "spark1.jpg"
       template: -> 
-         wrapper0: [
-            container0: [
-               add 'img'
-               each 'chats', _line: v 'text'
-               photo0: IMG image0: src: v 'photo' ]
-            INPUT input0: type: 'text' ]
+         wrapper0:
+            container0:
+               $add: img: {}
+               $each: chats: _line: $v: 'text'
+               IMG:  image0: src: $v: 'photo'
+            INPUT:   input0: type: 'text'
       style:
          container0: position: 'fixed', bottom: bottom * 2
          _line:      display: 'block'
          input0:     position: 'fixed', bottom: bottom, width: width, height: bottom
          image0:     width: 'inherit'
          photo0:     position: 'fixed', bottom: bottom + 5, right: 5, width: 100
+      helpers: 
+         chats: -> db.Chats.find {}
+         photo: -> "spark1.jpg"
       events: ->
-         'keypress #[input0]': (e) =>
-            if e.keyCode == 13 and text = $(@Id '#input0').val()
-               $(@Id '#input0').val ''
+         'keypress [#input0]': (e) =>
+            if e.keyCode == 13 and text = ($input = $(@Id '#input0')).val()
+               $input.val ''
                Meteor.call 'says', 'isaac', text
       methods: says: (id, text) -> db.Chats.insert id: id, text: text
       collections: Chats: {}
 
    home: ->
+      @Matches = []
       icon_index = 0
       setImage = (id, i) -> Session.set 'img-photo-id', Matches[i].public_ids[0] # Settings.image_url 'data:image/gif;base64,'
       pass   = ($s) -> $s.animate top: '+=1000', 600, -> $s.remove()
@@ -105,17 +105,60 @@ exports.Modules = ->
          _front: zIndex:  10, top: pic_top  
          _back:  zIndex: -10, left: width
          _touched: zIndex: 30, width: width - 1, background: 'white', borderRadius: 2, padding: '8px 6px', boxShadow: '1px 1px 5px 1px'
-      onRendered:  -> push(0)
       collections: -> collections.call @
+      fn: UserReady: -> push(0)
 
-   camerao:
+
+   cameraPage: ->
+      uploadPhoto = (uri) ->
+         options = new FileUploadOptions()
+         options.fileKey = 'file'
+         options.fileName = uri[uri.lastIndexOf('/') + 1..]
+         options.mimeType = 'image/jpeg'
+         (new FileTransfer()).upload uri, Settings.upload, ((r) -> console.log 'r', r), ((r) -> console.log r), options
+         true
+
       router: path: '/camera'
-      jade: 
-         location0: '{{loca}}'
-         '+camera': ''     
+      jade:
+         "header(class='bar bar-nav')": "h1(class='title')": 'Title'
+         "img(id='camera-photo' style='width:100%;')": ''
+      template: ->
+         header: class: 'bar bar-nav', $: h1: class: 'title', $: 'Title'
+         img: id: 'camera-photo', style: 'width:100%;'
+      _html: """
+         <header class="bar bar-nav"><h1 class="title">Title</h1></header>
+         <img id="camera-photo" style="width:100%;">"""
+
       helpers: loca: -> navigator.geolocation.getCurrentPosition (pos)-> Session.set 'location', pos
-      onRendered: ->
-         #MeteorCamera.getPicture (->), (->)
+      onRendered: -> 
+         navigator.camera.getPicture ((uri) -> console.log(uri) or uploadPhoto(uri) and $('#camera-photo').attr 'src', uri), (->), options =
+            quality: 50
+            destinationType: navigator.camera.DestinationType.FILE_URI,
+            encodingType:    Camera.EncodingType.JPEG,
+            sourceType:      Camera.PictureSourceType.CAMERA
+
+      onServerStartup: ->
+         Router.route('/upload', ((r) -> console.log 'uploaded', r.body), where: 'server')
+            .post -> console.log('POST POST POST') or @response.end 'post request\n'
+            .put  -> console.log('put') or @response.end 'put request\n'
+
+
+      fn:
+         Read: (filename, method) ->
+            requestFileSystem LocalFileSystem.PERSISTENT, 0, ((fs) ->
+               console.log 'fs', fs
+               fs.root.getFile filename, null, ((entry) ->
+                  console.log 'entry', entry
+                  entry.file ((f) ->
+                     console.log 'f', f
+                     reader = new FileReader()
+                     reader.onloadend = (evt) ->
+                        console.log "Read as data URL"
+                        console.log evt.target.result
+                     reader['readAs' + method[0].toUpperCase() + method[1..]] f
+                  ), (e) -> console.log e
+               ), (e) -> console.log e   
+            ), (e) -> console.log e
 
    chosenbox:
       jade: '.chosen-container(id="chosen-{{id}}" style="left:{{left}}px;")': ['img(id="chosen-box-{{id}}")']
@@ -164,13 +207,17 @@ exports.Settings = ->
             APP_ID:  process.env.FACEBOOK_CLIENT_ID
             API_KEY: process.env.FACEBOOK_SECRET
       accessRule: [
-         'http://res.cloudinary.com/*']
+         'http://res.cloudinary.com/*'
+         'http://meteor.local/*'
+         'http://192.168.1.78/*'
+         'mongodb://ds031922.mongolab.com/*']
    title: -> @app.info.name
    theme: "clean"
    lib:   "ui"
    public: 
       collections: {}
       image_url: "http://res.cloudinary.com/sparks/image/upload/"
+      upload: 'http://192.168.1.78:3000/upload'
    cloudinary:
       cloud_name: "sparks"
       api_key: process.env.CLOUDINARY_API_KEY
