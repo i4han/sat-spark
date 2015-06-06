@@ -10,10 +10,10 @@ mquandalle:jade
 mizzao:jquery-ui
 mizzao:bootstrap-3
 jquery
-iron:router
 http
 fortawesome:fontawesome
 accounts-password
 service-configuration
 isaac:cubesat@0.4.21
 pcjpcj2:ratchet
+iron:router@1.0.7

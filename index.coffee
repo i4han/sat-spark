@@ -96,15 +96,15 @@ exports.Modules = ->
                when e.target.y < pic_top - swipe then push(i + 1) and choose $front
                else $front.switchClass 'touched', 'front', 100, ->  $front.animate top: pic_top, 100
 
-
       router: path: '/'
       jade: ['img(id="photo-0" class="back photo" src="spark0.jpg")']
+      template: img: photo0: class: 'back photo', src: 'spark0.jpg'
       style:
          _photo: position: 'fixed', width: width, top: pic_top, background: 'white', overflow: 'hidden'
-         _icon:  zIndex:  20, width: box, top: top, clip: 'rect(0px, 75px, 75px, 0px)'
-         _front: zIndex:  10, top: pic_top  
-         _back:  zIndex: -10, left: width
-         _touched: zIndex: 30, width: width - 1, background: 'white', borderRadius: 2, padding: '8px 6px', boxShadow: '1px 1px 5px 1px'
+         _icon:    zIndex:  20, width: box, top: top, clip: 'rect(0px, 75px, 75px, 0px)'
+         _front:   zIndex:  10, top: pic_top  
+         _back:    zIndex: -10, left: width
+         _touched: zIndex:  30, width: width - 1, background: 'white', borderRadius: 2, padding: '8px 6px', boxShadow: '1px 1px 5px 1px'
       collections: -> collections.call @
       fn: UserReady: -> push(0)
 
@@ -115,8 +115,16 @@ exports.Modules = ->
          options.fileKey = 'file'
          options.fileName = uri[uri.lastIndexOf('/') + 1..]
          options.mimeType = 'image/jpeg'
-         (new FileTransfer()).upload uri, Settings.upload, ((r) -> console.log 'r', r), ((r) -> console.log r), options
-         true
+         options.chunkedMode = false
+         console.log Settings.upload
+         (new FileTransfer()).upload uri, Settings.upload, ( (r) -> 
+            console.log 'r', r
+         ), ( (r) -> 
+            console.log r
+         ), options
+      upload = (url) -> resolveLocalFileSystemURL url, (entry) ->
+         entry.file ((data) -> uploadPhoto data.localURL), (e) -> console.log e
+
 
       router: path: '/camera'
       jade:
@@ -131,17 +139,18 @@ exports.Modules = ->
 
       helpers: loca: -> navigator.geolocation.getCurrentPosition (pos)-> Session.set 'location', pos
       onRendered: -> 
-         navigator.camera.getPicture ((uri) -> console.log(uri) or uploadPhoto(uri) and $('#camera-photo').attr 'src', uri), (->), options =
+         navigator.camera.getPicture ((uri) -> upload(uri)), (->), options =
             quality: 50
             destinationType: navigator.camera.DestinationType.FILE_URI,
             encodingType:    Camera.EncodingType.JPEG,
             sourceType:      Camera.PictureSourceType.CAMERA
 
       onServerStartup: ->
-         Router.route('/upload', ((r) -> console.log 'uploaded', r.body), where: 'server')
-            .post -> console.log('POST POST POST') or @response.end 'post request\n'
-            .put  -> console.log('put') or @response.end 'put request\n'
-
+         Router.onBeforeAction Iron.Router.bodyParser.urlencoded extended: false
+         Router.route('/upload', where: 'server').post -> 
+            console.log @request
+            @response.writeHead 200, 'Content-Type': 'text/plain'
+            @response.end "ok"
 
       fn:
          Read: (filename, method) ->
@@ -159,7 +168,14 @@ exports.Modules = ->
                   ), (e) -> console.log e
                ), (e) -> console.log e   
             ), (e) -> console.log e
-
+         b64toBlob: (dataURI, contentType) ->
+            byteString = atob dataURI.split(',')[1]
+            ab = new ArrayBuffer byteString.length
+            ia = new Uint8Array ab
+            [0...byteString.length].forEach (i) ->
+               ia[i] = byteString.charCodeAt(i)
+            new Blob [ab], type: contentType
+ 
    chosenbox:
       jade: '.chosen-container(id="chosen-{{id}}" style="left:{{left}}px;")': ['img(id="chosen-box-{{id}}")']
       style: _chosenContainer: position: 'fixed', zIndex: 200, top: top, border: 3, width: box, height: box, overflowY: 'hidden'
@@ -207,9 +223,10 @@ exports.Settings = ->
             APP_ID:  process.env.FACEBOOK_CLIENT_ID
             API_KEY: process.env.FACEBOOK_SECRET
       accessRule: [
-         'http://res.cloudinary.com/*'
+         'http://localhost/*'
          'http://meteor.local/*'
          'http://192.168.1.78/*'
+         'http://res.cloudinary.com/*'
          'mongodb://ds031922.mongolab.com/*']
    title: -> @app.info.name
    theme: "clean"
