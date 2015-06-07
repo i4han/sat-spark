@@ -108,23 +108,18 @@ exports.Modules = ->
       collections: -> collections.call @
       fn: UserReady: -> push(0)
 
-
    cameraPage: ->
       uploadPhoto = (uri) ->
-         options = new FileUploadOptions()
-         options.fileKey = 'file'
-         options.fileName = uri[uri.lastIndexOf('/') + 1..]
-         options.mimeType = 'image/jpeg'
-         options.chunkedMode = false
-         console.log Settings.upload
-         (new FileTransfer()).upload uri, Settings.upload, ( (r) -> 
-            console.log 'r', r
-         ), ( (r) -> 
-            console.log r
-         ), options
-      upload = (url) -> resolveLocalFileSystemURL url, (entry) ->
-         entry.file ((data) -> uploadPhoto data.localURL), (e) -> console.log e
+         (new FileTransfer()).upload uri, Settings.upload, ((r) -> console.log 'ok', r
+         ), ((r) -> console.log 'err', r
+         ), x.extend options = new FileUploadOptions(), o =
+            fileKey:  'file'
+            fileName: uri[uri.lastIndexOf('/') + 1..]
+            mimeType: 'image/jpeg'
+            chunkedMode: true
 
+      upload = (url) -> resolveLocalFileSystemURL url, (entry) ->
+         entry.file ((data) -> uploadPhoto l = data.localURL), (e) -> console.log e
 
       router: path: '/camera'
       jade:
@@ -133,48 +128,31 @@ exports.Modules = ->
       template: ->
          header: class: 'bar bar-nav', $: h1: class: 'title', $: 'Title'
          img: id: 'camera-photo', style: 'width:100%;'
-      _html: """
-         <header class="bar bar-nav"><h1 class="title">Title</h1></header>
-         <img id="camera-photo" style="width:100%;">"""
-
-      helpers: loca: -> navigator.geolocation.getCurrentPosition (pos)-> Session.set 'location', pos
       onRendered: -> 
          navigator.camera.getPicture ((uri) -> upload(uri)), (->), options =
             quality: 50
-            destinationType: navigator.camera.DestinationType.FILE_URI,
+            destinationType: Camera.DestinationType.FILE_URI,
             encodingType:    Camera.EncodingType.JPEG,
-            sourceType:      Camera.PictureSourceType.CAMERA
-
+            sourceType:      Camera.PictureSourceType.PHOTOLIBRARY
       onServerStartup: ->
-         Router.onBeforeAction Iron.Router.bodyParser.urlencoded extended: false
-         Router.route('/upload', where: 'server').post -> 
-            console.log @request
-            @response.writeHead 200, 'Content-Type': 'text/plain'
-            @response.end "ok"
-
-      fn:
-         Read: (filename, method) ->
-            requestFileSystem LocalFileSystem.PERSISTENT, 0, ((fs) ->
-               console.log 'fs', fs
-               fs.root.getFile filename, null, ((entry) ->
-                  console.log 'entry', entry
-                  entry.file ((f) ->
-                     console.log 'f', f
-                     reader = new FileReader()
-                     reader.onloadend = (evt) ->
-                        console.log "Read as data URL"
-                        console.log evt.target.result
-                     reader['readAs' + method[0].toUpperCase() + method[1..]] f
-                  ), (e) -> console.log e
-               ), (e) -> console.log e   
-            ), (e) -> console.log e
-         b64toBlob: (dataURI, contentType) ->
-            byteString = atob dataURI.split(',')[1]
-            ab = new ArrayBuffer byteString.length
-            ia = new Uint8Array ab
-            [0...byteString.length].forEach (i) ->
-               ia[i] = byteString.charCodeAt(i)
-            new Blob [ab], type: contentType
+         Busboy = Npm.require 'busboy'
+         fs     = Npm.require 'fs'
+         Router.onBeforeAction (req, res, next) ->
+            filenames = []
+            if req.method is 'POST' # req.path? == '/upload'
+               busboy = new Busboy headers: req.headers
+               busboy.on 'file', (field, file, filename) ->
+                  file.pipe fs.createWriteStream f = Settings.tmp_dir + filename
+                  filenames.push f
+               busboy.on 'field', (field, value) -> req.body[field] = value
+               busboy.on 'finish', -> 
+                  req.filenames = filenames
+                  next()
+               req.pipe busboy
+            else next()
+         Router.route('/upload', where: 'server').post ->
+               @response.writeHead 200, 'Content-Type': 'text/plain'
+               @response.end "ok"
  
    chosenbox:
       jade: '.chosen-container(id="chosen-{{id}}" style="left:{{left}}px;")': ['img(id="chosen-box-{{id}}")']
@@ -206,6 +184,9 @@ exports.Modules = ->
 
 
 exports.Settings = ->
+   local_ip = '192.168.1.78'
+   app_dir  = '/Users/isaac/workspace/spark/'
+
    app:
       info:
          id: 'com.spark.game'
@@ -225,16 +206,18 @@ exports.Settings = ->
       accessRule: [
          'http://localhost/*'
          'http://meteor.local/*'
-         'http://192.168.1.78/*'
+         "ws://#{local_ip}/*"
+         "http://#{local_ip}/*"
          'http://res.cloudinary.com/*'
          'mongodb://ds031922.mongolab.com/*']
    title: -> @app.info.name
    theme: "clean"
    lib:   "ui"
+   tmp_dir: "#{app_dir}tmp/"
    public: 
       collections: {}
       image_url: "http://res.cloudinary.com/sparks/image/upload/"
-      upload: 'http://192.168.1.78:3000/upload'
+      upload: "http://#{local_ip}:3000/upload"
    cloudinary:
       cloud_name: "sparks"
       api_key: process.env.CLOUDINARY_API_KEY
