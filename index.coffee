@@ -30,19 +30,28 @@ exports.Modules = ->
    
    layout: 
       jade: ['+chosen', '+yield', '+nav']
-      head: ["meta(name='viewport' content='width=device-width initial-scale=1.0, user-scalable=no')"]
+      head: [
+         "meta(name='viewport' content='width=device-width initial-scale=1.0, user-scalable=no')"
+         #"title": Settings.title
+      ]
 
    login:
       router: path: 'login'
-      jade: 'button#facebook-login(class="btn btn-default")': 'login with facebook'
+      jade:
+         _bar_barHeader_barLight: 'h1(class="title")': 'Login' 
+         'nav(class="bar bar-standard")': 'button#facebook(class="btn btn-click")': 'login with facebook' 
       onServerStartup: ->
          ServiceConfiguration.configurations.remove service: 'facebook'
+         console.log Settings.facebook.oauth.client_id
+         console.log Settings.facebook.oauth.secret
+         
          ServiceConfiguration.configurations.insert
             service: 'facebook'
             appId:  Settings.facebook.oauth.client_id
             secret: Settings.facebook.oauth.secret          
       events:
-         'click #facebook-login': -> Meteor.loginWithFacebook()
+         'touchend #facebook': -> console.log('touch') or Meteor.loginWithFacebook()
+         'click #facebook':    -> console.log('click') or Meteor.loginWithFacebook()
          'click #logout': -> Meteor.logout()
    chat:
       router: path: 'chat'
@@ -110,16 +119,19 @@ exports.Modules = ->
 
    cameraPage: ->
       uploadPhoto = (uri) ->
-         (new FileTransfer()).upload uri, Settings.upload, ((r) -> console.log 'ok', r
+         (ft = new FileTransfer()).upload uri, Settings.upload, ((r) -> console.log 'ok', r
          ), ((r) -> console.log 'err', r
          ), x.extend options = new FileUploadOptions(), o =
             fileKey:  'file'
             fileName: uri[uri.lastIndexOf('/') + 1..]
             mimeType: 'image/jpeg'
             chunkedMode: true
-
-      upload = (url) -> resolveLocalFileSystemURL url, (entry) ->
-         entry.file ((data) -> uploadPhoto l = data.localURL), (e) -> console.log e
+            params: id: 'isaac'
+         #ft.onprogress (r) -> console.log r
+      upload = (url) -> 
+         resolveLocalFileSystemURL url, ((entry) ->
+            entry.file ((data) -> console.log('data', data) or uploadPhoto l = data.localURL), (e) -> console.log e
+         ), (e) -> console.log 'resolve err', e
 
       router: path: '/camera'
       jade:
@@ -130,24 +142,34 @@ exports.Modules = ->
          img: id: 'camera-photo', style: 'width:100%;'
       onRendered: -> 
          navigator.camera.getPicture ((uri) -> upload(uri)), (->), options =
-            quality: 50
-            destinationType: Camera.DestinationType.FILE_URI,
-            encodingType:    Camera.EncodingType.JPEG,
-            sourceType:      Camera.PictureSourceType.PHOTOLIBRARY
+            quality: 90
+            cameraDirection: Camera.Direction.FRONT
+            destinationType: Camera.DestinationType.FILE_URI
+            encodingType:    Camera.EncodingType.JPEG           
+            sourceType:      Camera.PictureSourceType.CAMERA #PHOTOLIBRARY
+            #saveToPhotoAlbum: false
+            #allowEdit: true <- doesn't work. 
+
       onServerStartup: ->
-         Busboy = Npm.require 'busboy'
          fs     = Npm.require 'fs'
+         Busboy = Npm.require 'busboy'
+         cloud  = Npm.require 'cloudinary'
+         _ = Settings.cloudinary
+         cloud.config cloud_name: _.cloud_name, api_key: _.api_key, api_secret: _.api_secret
          Router.onBeforeAction (req, res, next) ->
             filenames = []
-            if req.method is 'POST' # req.path? == '/upload'
+            if req.url is '/upload' and req.method is 'POST'
                busboy = new Busboy headers: req.headers
-               busboy.on 'file', (field, file, filename) ->
-                  file.pipe fs.createWriteStream f = Settings.tmp_dir + filename
-                  filenames.push f
-               busboy.on 'field', (field, value) -> req.body[field] = value
+               busboy.on('file', (field, file, filename) ->
+                     console.log 'param', req
+                     file.pipe cloud.uploader.upload_stream (r) -> 
+                        console.log 'stream', r, req.body.id
+                     filenames.push filename)
                busboy.on 'finish', -> 
+                  console.log 'finish'
                   req.filenames = filenames
                   next()
+               busboy.on 'field', (field, value) -> console.log('field') or req.body[field] = value
                req.pipe busboy
             else next()
          Router.route('/upload', where: 'server').post ->
@@ -168,7 +190,7 @@ exports.Modules = ->
 
    menu_list:
       jade: li: 'a.main-menu(id="menu-toggle-{{id}}" href="{{path}}"):': 'i.fa(class="fa-{{icon}} fa-lg")'
-      helpers: path: -> ['/chat', '/camera', '/', '/setting'][@id]
+      helpers: path: -> ['/chat', '/camera', '/', '/setting', '/login'][@id]
       style: 
          '#main-menu ul li': display: 'inline-block', width: bottom * 1.5
          '.main-menu': display: 'inline-block', zIndex: 20, width: bottom * 1.5, color: 'white', padding: 6, textAlign: 'center'
@@ -177,15 +199,15 @@ exports.Modules = ->
 
    nav:
       jade: '#main-menu': ul: 'each menu': '+menu_list': ''
-      helpers: menu: -> [{id:0, icon: 'comment'}, {id:1, icon: 'camera'},  {id:2, icon: 'bolt'}, {id:3, icon: 'gear'}]         
+      helpers: menu: -> [{id:0, icon: 'comment'}, {id:1, icon: 'camera'},  {id:2, icon: 'bolt'}, {id:3, icon: 'gear'}, {id:4, icon: 'user'}]         
       style: 
          '#main-menu': position: 'fixed', zIndex: 20, left:0, bottom: 0, width: '100%', height: bottom, background: 'rgba(255, 0, 0, 1)'
-         '#main-menu ul': listStyleType: 'none', margin: 0, marginLeft: 40
+         '#main-menu ul': listStyleType: 'none', margin: 0, marginLeft: 0
 
 
 exports.Settings = ->
    local_ip = '192.168.1.78'
-   app_dir  = '/Users/isaac/workspace/spark/'
+   deploy_domain = 'sparkgame.meteor.com'
 
    app:
       info:
@@ -206,21 +228,23 @@ exports.Settings = ->
       accessRule: [
          'http://localhost/*'
          'http://meteor.local/*'
-         "ws://#{local_ip}/*"
          "http://#{local_ip}/*"
+         "ws://#{local_ip}/*"
+         "http://#{deploy_domain}/*"
+         "ws://#{deploy_domain}/*"
          'http://res.cloudinary.com/*'
          'mongodb://ds031922.mongolab.com/*']
    title: -> @app.info.name
    theme: "clean"
    lib:   "ui"
-   tmp_dir: "#{app_dir}tmp/"
    public: 
       collections: {}
       image_url: "http://res.cloudinary.com/sparks/image/upload/"
       upload: "http://#{local_ip}:3000/upload"
    cloudinary:
       cloud_name: "sparks"
-      api_key: process.env.CLOUDINARY_API_KEY
+      api_key:    process.env.CLOUDINARY_API_KEY
+      api_secret: process.env.CLOUDINARY_API_SECRET
    facebook:
       oauth:
          version: 'v2.3'

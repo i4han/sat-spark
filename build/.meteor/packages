@@ -17,3 +17,9 @@ service-configuration
 isaac:cubesat@0.4.21
 pcjpcj2:ratchet
 iron:router@1.0.9
+accounts-facebook
+meteoric:ionicons-sass
+meteoric:ionic-sass
+fourseven:scss
+meteoric:ionic
+busboy
