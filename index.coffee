@@ -29,45 +29,54 @@ exports.Modules = ->
    pic_height = height - (pic_top + bottom)
    
    layout: 
-      jade: ['+chosen', '+yield', '+nav']
-      head: [
-         "meta(name='viewport' content='width=device-width initial-scale=1.0, user-scalable=no')"
-         #"title": Settings.title
-      ]
+      template: -> include 'yield', 'tabBar'  
+      head: -> [ 
+         META  name:'viewport', content:'width=device-width initial-scale=1.0, user-scalable=no'
+         TITLE Settings.title ]
+   tab:
+      template: ->
+         A _tabItem: href: '{link}', $: @SPAN s0: {_icon: '{icon}'}, s1: _tabLabel: $: '{label}'
 
-   login:
-      router: path: 'login'
-      jade:
-         _bar_barHeader_barLight: 'h1(class="title")': 'Login' 
-         'nav(class="bar bar-standard")': 'button#facebook(class="btn btn-click")': 'login with facebook' 
-      onServerStartup: ->
-         ServiceConfiguration.configurations.remove service: 'facebook'
-         console.log Settings.facebook.oauth.client_id
-         console.log Settings.facebook.oauth.secret
-         
-         ServiceConfiguration.configurations.insert
-            service: 'facebook'
-            appId:  Settings.facebook.oauth.client_id
-            secret: Settings.facebook.oauth.secret          
+   tabBar:
+      template: -> NAV _bar: 'tab', $: each menu: include 'tab'
+      helpers:
+         menu: -> [
+            {label: 'chat',      icon: 'play',   link: '/chat'    }
+            {label: 'camera',    icon: 'info',   link: '/camera'  }
+            {label: 'spark',     icon: 'star',   link: '/spark'   }
+            {label: 'profile',   icon: 'person', link: '/login'   }
+            {label: 'settings',  icon: 'gear',   link: '/setting' } ]
+
+   header: template: -> HEADER _bar: 'nav', $: H1 _title: $: '{title}' 
+
+   login: ->
+      fbLogin = -> 
+         facebookConnectPlugin.login ["public_profile"], (->
+            console.log 'fb connected'
+         ), (->)
+
+      router: path: 'login'         
+      template: -> [ #add header: title: 'Login'
+         include header: title: 'Login'
+         NAV _bar: 'standard header-secondary', $: BUTTON _btn: 'block', $: 'ok'
+         NAV _bar: 'standard footer-secondary', $: BUTTON _btn: 'block', id: 'facebook', $: 'login with facebook' ]
+      helpers: ->
+         token: ->
+            facebookConnectPlugin.getAccessToken ((token) ->
+               Session.set 'fbToken', token
+            ), (->)         
       events:
-         'touchend #facebook': -> console.log('touch') or Meteor.loginWithFacebook()
-         'click #facebook':    -> console.log('click') or Meteor.loginWithFacebook()
-         'click #logout': -> Meteor.logout()
+         'touchend #facebook': -> console.log('touch') or fbLogin()
+
    chat:
       router: path: 'chat'
-      jade: 
-         wrapper0:
-            container0: 
-               'each chats': line0: '{{text}}'
-               photo0: 'img[#image0](src="{{photo}}")': ' '
-            'input#[input0](type="text")': ''
-      template: -> 
-         wrapper0:
-            container0:
-               $add: img: {}
-               $each: chats: _line: $v: 'text'
-               IMG:  image0: src: $v: 'photo'
-            INPUT:   input0: type: 'text'
+      template: -> [
+         include header: title: 'Login'
+         wrapper0: [
+            container0: [
+               each chats: line0: '{text}'
+               @IMG image0: src: '{photo}' ]
+            @INPUT input0: type: 'text' ]]
       style:
          container0: position: 'fixed', bottom: bottom * 2
          _line:      display: 'block'
@@ -85,7 +94,7 @@ exports.Modules = ->
       methods: says: (id, text) -> db.Chats.insert id: id, text: text
       collections: Chats: {}
 
-   home: ->
+   spark: ->
       @Matches = []
       icon_index = 0
       setImage = (id, i) -> Session.set 'img-photo-id', Matches[i].public_ids[0] # Settings.image_url 'data:image/gif;base64,'
@@ -96,24 +105,23 @@ exports.Modules = ->
          $front = $('#photo-' + i)
          photo = Settings.image_url + Matches[i].public_ids[0]
          $front
-            .switchClass 'back', 'front', 0, -> $('#photo-' + (i + 1)).css left: 0
-            .after "<img id=photo-#{i + 1} class=\"back photo\" src=#{photo}.jpg>"
+            .switchClass 'photo-back', 'photo-front', 0, -> $('#photo-' + (i + 1)).css left: 0
+            .after "<img id=photo-#{i + 1} class=\"photo-back photo\" src=#{photo}.jpg>"
             .draggable axis: 'y'
-            .on 'touchstart', (e) -> $front.switchClass 'front', 'touched', 100
+            .on 'touchstart', (e) -> $front.switchClass 'photo-front', 'touched', 100
             .on 'touchend',   (e) -> switch
                when e.target.y > pic_top + swipe then push(i + 1) and pass   $front
                when e.target.y < pic_top - swipe then push(i + 1) and choose $front
-               else $front.switchClass 'touched', 'front', 100, ->  $front.animate top: pic_top, 100
+               else $front.switchClass 'touched', 'photo-front', 100, ->  $front.animate top: pic_top, 100
 
-      router: path: '/'
-      jade: ['img(id="photo-0" class="back photo" src="spark0.jpg")']
-      template: img: photo0: class: 'back photo', src: 'spark0.jpg'
+      router: path: '/spark'
+      template: -> IMG _photo: 'back', id: 'photo-0', src: 'spark0.jpg'
       style:
-         _photo: position: 'fixed', width: width, top: pic_top, background: 'white', overflow: 'hidden'
-         _icon:    zIndex:  20, width: box, top: top, clip: 'rect(0px, 75px, 75px, 0px)'
-         _front:   zIndex:  10, top: pic_top  
-         _back:    zIndex: -10, left: width
-         _touched: zIndex:  30, width: width - 1, background: 'white', borderRadius: 2, padding: '8px 6px', boxShadow: '1px 1px 5px 1px'
+         _photo:      position: 'fixed', width: width, top: pic_top, background: 'white', overflow: 'hidden'
+         _icon:       zIndex:  20, width: box, top: top, clip: 'rect(0px, 75px, 75px, 0px)'
+         _photoFront: zIndex:  10, top: pic_top  
+         _photoBack:  zIndex: -10, left: width
+         _touched:    zIndex:  30, width: width - 1, background: 'white', borderRadius: 2, padding: '8px 6px', boxShadow: '1px 1px 5px 1px'
       collections: -> collections.call @
       fn: UserReady: -> push(0)
 
@@ -121,7 +129,7 @@ exports.Modules = ->
       uploadPhoto = (uri) ->
          (ft = new FileTransfer()).upload uri, Settings.upload, ((r) -> console.log 'ok', r
          ), ((r) -> console.log 'err', r
-         ), x.extend options = new FileUploadOptions(), o =
+         ), x.assign options = new FileUploadOptions(), o =
             fileKey:  'file'
             fileName: uri[uri.lastIndexOf('/') + 1..]
             mimeType: 'image/jpeg'
@@ -134,26 +142,21 @@ exports.Modules = ->
          ), (e) -> console.log 'resolve err', e
 
       router: path: '/camera'
-      jade:
-         "header(class='bar bar-nav')": "h1(class='title')": 'Title'
-         "img(id='camera-photo' style='width:100%;')": ''
-      template: ->
-         header: class: 'bar bar-nav', $: h1: class: 'title', $: 'Title'
-         img: id: 'camera-photo', style: 'width:100%;'
+      template: -> [
+         include header: title: 'Camera'
+         IMG    id: 'camera-photo', style: 'width:100%;' ]         
       onRendered: -> 
          navigator.camera.getPicture ((uri) -> upload(uri)), (->), options =
             quality: 90
             cameraDirection: Camera.Direction.FRONT
             destinationType: Camera.DestinationType.FILE_URI
             encodingType:    Camera.EncodingType.JPEG           
-            sourceType:      Camera.PictureSourceType.CAMERA #PHOTOLIBRARY
-            #saveToPhotoAlbum: false
-            #allowEdit: true <- doesn't work. 
+            sourceType:      Camera.PictureSourceType.CAMERA #PHOTOLIBRARY #saveToPhotoAlbum: false #allowEdit: true <- doesn't work. 
 
       onServerStartup: ->
          fs     = Npm.require 'fs'
-         Busboy = Npm.require 'busboy'
-         cloud  = Npm.require 'cloudinary'
+         Busboy = x.require 'busboy'
+         cloud  = x.require 'cloudinary'
          _ = Settings.cloudinary
          cloud.config cloud_name: _.cloud_name, api_key: _.api_key, api_secret: _.api_secret
          Router.onBeforeAction (req, res, next) ->
@@ -173,41 +176,27 @@ exports.Modules = ->
                req.pipe busboy
             else next()
          Router.route('/upload', where: 'server').post ->
-               @response.writeHead 200, 'Content-Type': 'text/plain'
-               @response.end "ok"
+            @response.writeHead 200, 'Content-Type': 'text/plain'
+            @response.end "ok"
  
    chosenbox:
-      jade: '.chosen-container(id="chosen-{{id}}" style="left:{{left}}px;")': ['img(id="chosen-box-{{id}}")']
+      template: -> _chosenContainer: id: "chosen-{id}", style:"left:{left}px;", $: IMG id: "chosen-box-{id}"
       style: _chosenContainer: position: 'fixed', zIndex: 200, top: top, border: 3, width: box, height: box, overflowY: 'hidden'
 
    chosen:
-      jade: $chosen: 'each chosen': '+chosenbox': ''
+      jade: '#chosen': 'each chosen': '+chosenbox': ''
       helpers: chosen: [0..4].map (i) -> id: i, left: box * i
 
    settings:
       router: path: 'setting'
-      jade: h2: 'Settings'
-
-   menu_list:
-      jade: li: 'a.main-menu(id="menu-toggle-{{id}}" href="{{path}}"):': 'i.fa(class="fa-{{icon}} fa-lg")'
-      helpers: path: -> ['/chat', '/camera', '/', '/setting', '/login'][@id]
-      style: 
-         '#main-menu ul li': display: 'inline-block', width: bottom * 1.5
-         '.main-menu': display: 'inline-block', zIndex: 20, width: bottom * 1.5, color: 'white', padding: 6, textAlign: 'center'
-         '.main-menu:hover': backgroundColor: 'rgba(255, 128, 128, 1)'
-         '.main-menu:focus': backgroundColor: 'white'
-
-   nav:
-      jade: '#main-menu': ul: 'each menu': '+menu_list': ''
-      helpers: menu: -> [{id:0, icon: 'comment'}, {id:1, icon: 'camera'},  {id:2, icon: 'bolt'}, {id:3, icon: 'gear'}, {id:4, icon: 'user'}]         
-      style: 
-         '#main-menu': position: 'fixed', zIndex: 20, left:0, bottom: 0, width: '100%', height: bottom, background: 'rgba(255, 0, 0, 1)'
-         '#main-menu ul': listStyleType: 'none', margin: 0, marginLeft: 0
+      template: -> [
+         include header: title: 'Settings'
+         H2 'Settings' ]
 
 
 exports.Settings = ->
    local_ip = '192.168.1.78'
-   deploy_domain = 'sparkgame.meteor.com'
+   deploy_domain = 'spark5.meteor.com'
 
    app:
       info:
@@ -234,9 +223,20 @@ exports.Settings = ->
          "ws://#{deploy_domain}/*"
          'http://res.cloudinary.com/*'
          'mongodb://ds031922.mongolab.com/*']
+   deploy:
+      name: 'spark5' #sparkgame spark[1-5]
+      mobileServer: 'http://spark5.meteor.com'
+
    title: -> @app.info.name
    theme: "clean"
    lib:   "ui"
+   env:
+      production:
+         MONGO_URL: process.env.MONGO_URL
+   npm:
+      busboy:     "0.2.9"
+      cloudinary: "1.2.1"
+   npmReset: false
    public: 
       collections: {}
       image_url: "http://res.cloudinary.com/sparks/image/upload/"

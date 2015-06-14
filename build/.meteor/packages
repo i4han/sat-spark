@@ -4,6 +4,7 @@
 # 'meteor add' and 'meteor remove' will edit this file for you,
 # but you can also edit it by hand.
 
+isaac:early-bird
 meteor-platform
 stylus
 mquandalle:jade
@@ -18,8 +19,5 @@ isaac:cubesat@0.4.21
 pcjpcj2:ratchet
 iron:router@1.0.9
 accounts-facebook
-meteoric:ionicons-sass
-meteoric:ionic-sass
-fourseven:scss
-meteoric:ionic
-busboy
+
+

@@ -15,6 +15,7 @@ App.setPreference("HideKeyboardFormAccessoryBar", "true");
 
 App.configurePlugin("com.phonegap.plugins.facebookconnect", {
    APP_ID: "839822572732286",
+   APP_NAME: "spark-game-test",
    API_KEY: "d48753b6d59e2e908fe313d0aa8011b8"
 });
 
