@@ -15,7 +15,6 @@ App.setPreference("HideKeyboardFormAccessoryBar", "true");
 
 App.configurePlugin("com.phonegap.plugins.facebookconnect", {
    APP_ID: "839822572732286",
-   APP_NAME: "spark-game-test",
    API_KEY: "d48753b6d59e2e908fe313d0aa8011b8"
 });
 
@@ -23,8 +22,8 @@ App.accessRule("http://localhost/*");
 App.accessRule("http://meteor.local/*");
 App.accessRule("http://192.168.1.78/*");
 App.accessRule("ws://192.168.1.78/*");
-App.accessRule("http://sparkgame.meteor.com/*");
-App.accessRule("ws://sparkgame.meteor.com/*");
+App.accessRule("http://spark5.meteor.com/*");
+App.accessRule("ws://spark5.meteor.com/*");
 App.accessRule("http://res.cloudinary.com/*");
 App.accessRule("mongodb://ds031922.mongolab.com/*");
 

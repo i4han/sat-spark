@@ -62,6 +62,60 @@ collections = function() {
   };
 };
 
+exports.Parts = function() {
+  return {
+    $header: function(t) {
+      return HEADER({
+        _bar: 'nav',
+        _: H1({
+          _title: {
+            _: t
+          }
+        })
+      });
+    },
+    $blockButton: function(o) {
+      return BUTTON({
+        _btn: 'block',
+        id: o.id,
+        _: o._
+      });
+    },
+    $mp: function(v) {
+      return {
+        margin: v,
+        padding: v
+      };
+    },
+    $box: function(a) {
+      return {
+        width: a[0],
+        height: a[1]
+      };
+    },
+    $fixedTop: function(v) {
+      return {
+        position: 'fixed',
+        top: v
+      };
+    },
+    $fixedBottom: function(v) {
+      return {
+        position: 'fixed',
+        bottom: v
+      };
+    },
+    $photoCard: function(v) {
+      return {
+        background: 'white',
+        borderRadius: 2,
+        padding: v || '8px 6px',
+        boxShadow: '1px 1px 5px 1px'
+      };
+    }
+  };
+};
+
 exports.Modules = function() {
   var bottom, box, height, pic_height, pic_top, swipe, top, width;
 
@@ -74,85 +128,60 @@ exports.Modules = function() {
   pic_top = top + box;
   pic_height = height - (pic_top + bottom);
   return {
-    layout: {
-      template: function() {
-        return include('yield', 'tabBar');
-      },
-      head: function() {
-        return [
-          META({
-            name: 'viewport',
-            content: 'width=device-width initial-scale=1.0, user-scalable=no'
-          }), TITLE(Settings.title)
-        ];
-      }
+    layout: function() {
+      return {
+        template: function() {
+          return include('yield', 'tabBar');
+        },
+        head: function() {
+          return [
+            META({
+              name: 'viewport',
+              content: 'width=device-width initial-scale=1.0, user-scalable=no'
+            }), TITLE(Settings.title)
+          ];
+        }
+      };
     },
-    tab: {
-      template: function() {
-        return A({
-          _tabItem: {
-            href: '{link}',
-            $: this.SPAN({
-              s0: {
-                _icon: '{icon}'
-              },
-              s1: {
-                _tabLabel: {
-                  $: '{label}'
+    tab: function() {
+      return {
+        template: function() {
+          return A({
+            _tabItem: {
+              href: '{path}',
+              _: SPAN(this)({
+                s0: {
+                  _icon: '{icon}'
+                },
+                s1: {
+                  _tabLabel: {
+                    _: '{label}'
+                  }
                 }
-              }
-            })
-          }
-        });
-      }
+              })
+            }
+          });
+        },
+        helpers: x.reduce(['path', 'icon', 'label'], {}, function(o, v) {
+          return x.object(o, v, function() {
+            return Modules[this][v];
+          });
+        })
+      };
     },
     tabBar: {
       template: function() {
         return NAV({
           _bar: 'tab',
-          $: each({
+          _: each({
             menu: include('tab')
           })
         });
       },
       helpers: {
         menu: function() {
-          return [
-            {
-              label: 'chat',
-              icon: 'play',
-              link: '/chat'
-            }, {
-              label: 'camera',
-              icon: 'info',
-              link: '/camera'
-            }, {
-              label: 'spark',
-              icon: 'star',
-              link: '/spark'
-            }, {
-              label: 'profile',
-              icon: 'person',
-              link: '/login'
-            }, {
-              label: 'settings',
-              icon: 'gear',
-              link: '/setting'
-            }
-          ];
+          return 'chat camera spark settings login'.split(' ');
         }
-      }
-    },
-    header: {
-      template: function() {
-        return HEADER({
-          _bar: 'nav',
-          $: H1({
-            _title: {
-              $: '{title}'
-            }
-          })
-        });
       }
     },
     login: function() {
@@ -164,30 +193,29 @@ exports.Modules = function() {
         }), (function() {}));
       };
       return {
-        router: {
-          path: 'login'
-        },
+        icon: 'person',
+        path: '/login',
         template: function() {
           return [
-            include({
-              header: {
-                title: 'Login'
+            {
+              $header: 'Login'
+            }, NAV(this)({
+              b0: {
+                _bar: 'standard footer-secondary',
+                _: {
+                  $blockButton: {
+                    id: 'facebook',
+                    _: 'login with facebook'
+                  }
+                }
               }
-            }), NAV({
-              _bar: 'standard header-secondary',
-              $: BUTTON({
-                _btn: 'block',
-                $: 'ok'
-              })
-            }), NAV({
-              _bar: 'standard footer-secondary',
-              $: BUTTON({
-                _btn: 'block',
-                id: 'facebook',
-                $: 'login with facebook'
-              })
             })
           ];
+        },
+        style: {
+          b0: {
+            bottom: 70
+          }
         },
         helpers: function() {
           return {
@@ -206,68 +234,57 @@ exports.Modules = function() {
       };
     },
     chat: {
-      router: {
-        path: 'chat'
-      },
+      icon: 'play',
+      path: '/chat',
       template: function() {
         return [
-          include({
-            header: {
-              title: 'Login'
-            }
-          }), {
-            wrapper0: [
-              {
-                container0: [
-                  each({
-                    chats: {
-                      line0: '{text}'
-                    }
-                  }), this.IMG({
-                    image0: {
-                      src: '{photo}'
-                    }
-                  })
-                ]
-              }, this.INPUT({
-                input0: {
-                  type: 'text'
-                }
+          {
+            $header: 'Chat',
+            _content: {
+              _contentPadded: each({
+                chats: DIV({
+                  id: '{id}',
+                  _chat: '{side}',
+                  _: '{text}'
+                })
               })
-            ]
-          }
+            }
+          }, NAV({
+            _bar: 'standard footer-secondary',
+            _: INPUT(this)({
+              input0: {
+                type: 'text'
+              }
+            })
+          })
         ];
       },
       style: {
-        container0: {
-          position: 'fixed',
-          bottom: bottom * 2
+        _contentPadded: {
+          $fixedBottom: bottom * 2
         },
-        _line: {
+        _chat: {
           display: 'block'
         },
+        _chatMe: {
+          color: 'black'
+        },
+        _chatYou: {
+          marginLeft: 20
+        },
+        _chatRead: {
+          color: 'grey'
+        },
         input0: {
-          position: 'fixed',
-          bottom: bottom,
-          width: width,
-          height: bottom
-        },
-        image0: {
-          width: 'inherit'
-        },
-        photo0: {
-          position: 'fixed',
-          bottom: bottom + 5,
-          right: 5,
-          width: 100
+          $fixedBottom: bottom,
+          $box: ['100%', bottom],
+          $mp: 0,
+          border: 0
         }
       },
       helpers: {
         chats: function() {
           return db.Chats.find({});
-        },
-        photo: function() {
-          return "spark1.jpg";
         }
       },
       events: function() {
@@ -275,10 +292,10 @@ exports.Modules = function() {
 
         return {
           'keypress [#input0]': function(e) {
-            var $input, text;
+            var Jinput, text;
 
-            if (e.keyCode === 13 && (text = ($input = $(_this.Id('#input0'))).val())) {
-              $input.val('');
+            if (e.keyCode === 13 && (text = (Jinput = $(_this.Id('#input0'))).val())) {
+              Jinput.val('');
               return Meteor.call('says', 'isaac', text);
             }
           }
@@ -305,42 +322,42 @@ exports.Modules = function() {
       setImage = function(id, i) {
         return Session.set('img-photo-id', Matches[i].public_ids[0]);
       };
-      pass = function($s) {
-        return $s.animate({
+      pass = function(J) {
+        return J.animate({
           top: '+=1000'
         }, 600, function() {
-          return $s.remove();
+          return J.remove();
         });
       };
-      choose = function($s) {
-        return $s.animate({
+      choose = function(J) {
+        return J.animate({
           top: top,
           width: box,
           left: box * icon_index++,
           clip: 'rect(0px, 75px, 75px, 0px)'
         }, 500, function() {
-          return $s.switchClass('touched', 'icon', 300);
+          return J.switchClass('photo-touched', 'icon', 300);
         });
       };
       push = function(i) {
-        var $front, loaded, photo;
+        var Jfront, loaded, photo;
 
         loaded = true;
-        $front = $('#photo-' + i);
+        Jfront = $('#photo-' + i);
         photo = Settings.image_url + Matches[i].public_ids[0];
-        return $front.switchClass('photo-back', 'photo-front', 0, function() {
+        return Jfront.switchClass('photo-back', 'photo-front', 0, function() {
           return $('#photo-' + (i + 1)).css({
             left: 0..after(("<img id=photo-" + (i + 1) + " class=\"photo-back photo\" src=" + photo + ".jpg>").draggable({
               axis: 'y'.on('touchstart', function(e) {
-                return $front.switchClass('photo-front', 'touched', 100..on('touchend', function(e) {
+                return Jfront.switchClass('photo-front', 'photo-touched', 100..on('touchend', function(e) {
                   switch (false) {
                     case !(e.target.y > pic_top + swipe):
-                      return push(i + 1) && pass($front);
+                      return push(i + 1) && pass(Jfront);
                     case !(e.target.y < pic_top - swipe):
-                      return push(i + 1) && choose($front);
+                      return push(i + 1) && choose(Jfront);
                     default:
-                      return $front.switchClass('touched', 'photo-front', 100, function() {
-                        return $front.animate({
+                      return Jfront.switchClass('photo-touched', 'photo-front', 100, function() {
+                        return Jfront.animate({
                           top: pic_top
                         }, 100);
                       });
@@ -352,21 +369,24 @@ exports.Modules = function() {
         });
       };
       return {
-        router: {
-          path: '/spark'
-        },
+        icon: 'star',
+        path: '/',
         template: function() {
-          return IMG({
-            _photo: 'back',
-            id: 'photo-0',
-            src: 'spark0.jpg'
-          });
+          return [
+            {
+              $header: 'Spark',
+              _content: IMG({
+                _photo: 'back',
+                id: 'photo-0',
+                src: 'spark0.jpg'
+              })
+            }
+          ];
         },
         style: {
           _photo: {
-            position: 'fixed',
+            $fixedTop: pic_top,
             width: width,
-            top: pic_top,
             background: 'white',
             overflow: 'hidden'
           },
@@ -384,13 +404,10 @@ exports.Modules = function() {
             zIndex: -10,
             left: width
           },
-          _touched: {
+          _photoTouched: {
             zIndex: 30,
             width: width - 1,
-            background: 'white',
-            borderRadius: 2,
-            padding: '8px 6px',
-            boxShadow: '1px 1px 5px 1px'
+            $photoCard: ''
           }
         },
         collections: function() {
@@ -403,7 +420,7 @@ exports.Modules = function() {
         }
       };
     },
-    cameraPage: function() {
+    camera: function() {
       var upload, uploadPhoto;
 
       uploadPhoto = function(uri) {
@@ -437,16 +454,13 @@ exports.Modules = function() {
         });
       };
       return {
-        router: {
-          path: '/camera'
-        },
+        icon: 'info',
+        path: '/camera',
         template: function() {
           return [
-            include({
-              header: {
-                title: 'Camera'
-              }
-            }), IMG({
+            {
+              $header: 'Camera'
+            }, IMG({
               id: 'camera-photo',
               style: 'width:100%;'
             })
@@ -465,7 +479,7 @@ exports.Modules = function() {
             sourceType: Camera.PictureSourceType.CAMERA
           });
         },
-        onServerStartup: function() {
+        onServer: function() {
           var Busboy, cloud, fs, _;
 
           fs = Npm.require('fs');
@@ -493,12 +507,11 @@ exports.Modules = function() {
                 return filenames.push(filename);
               });
               busboy.on('finish', function() {
-                console.log('finish');
                 req.filenames = filenames;
                 return next();
               });
               busboy.on('field', function(field, value) {
-                return console.log('field') || (req.body[field] = value);
+                return req.body[field] = value;
               });
               return req.pipe(busboy);
             } else {
@@ -522,7 +535,7 @@ exports.Modules = function() {
           _chosenContainer: {
             id: "chosen-{id}",
             style: "left:{left}px;",
-            $: IMG({
+            _: IMG({
               id: "chosen-box-{id}"
             })
           }
@@ -530,23 +543,21 @@ exports.Modules = function() {
       },
       style: {
         _chosenContainer: {
-          position: 'fixed',
+          $fixedTop: top,
+          $box: [box, box],
           zIndex: 200,
-          top: top,
           border: 3,
-          width: box,
-          height: box,
           overflowY: 'hidden'
         }
       }
     },
     chosen: {
-      jade: {
-        '#chosen': {
-          'each chosen': {
-            '+chosenbox': ''
-          }
-        }
+      template: function() {
+        return {
+          '#chosen': each({
+            chosen: include('chosenbox')
+          })
+        };
       },
       helpers: {
         chosen: [0, 1, 2, 3, 4].map(function(i) {
@@ -558,16 +569,13 @@ exports.Modules = function() {
       }
     },
     settings: {
-      router: {
-        path: 'setting'
-      },
+      icon: 'gear',
+      path: '/setting',
       template: function() {
         return [
-          include({
-            header: {
-              title: 'Settings'
-            }
-          }), H2('Settings')
+          {
+            $header: 'Settings'
+          }, H2('Settings')
         ];
       }
     }
@@ -621,7 +629,6 @@ exports.Settings = function() {
       busboy: "0.2.9",
       cloudinary: "1.2.1"
     },
-    npmReset: false,
     "public": {
       collections: {},
       image_url: "http://res.cloudinary.com/sparks/image/upload/",
