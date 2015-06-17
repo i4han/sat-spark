@@ -19,8 +19,10 @@ collections = ->
                   callback: -> @Chunks = db['fs.chunks'].find({}).fetch()
 
 exports.Parts = ->
-   $header:      (t) -> HEADER _bar: 'nav', _: H1 _title: _: t
-   $blockButton: (o) -> BUTTON _btn: 'block', id: o.id, _: o._
+   $header:      (t) -> HEADER _bar: '* *-nav', _: H1 _title: _: t
+   $_header:     (t) -> DIV _bar: '* *-header *-light', H1 class: 'title', t
+   $btnBlock:    (v) -> _btn: '* *-block', id: v
+   $v:           (v) -> '|': v
    $mp:          (v) -> margin: v, padding: v
    $box:         (a) -> width: a[0], height: a[1]
    $fixedTop:    (v) -> position: 'fixed', top: v
@@ -44,11 +46,17 @@ exports.Modules = ->
          TITLE Settings.title ]
 
    tab: ->       
-      template: -> A _tabItem: href: '{path}', _: SPAN(@) s0: {_icon: '{icon}'}, s1: _tabLabel: _: '{label}'
+      template: -> A _tabItem: href: '{path}', dataIgnore: 'push', SPAN(@) s0: {_icon: '* *-{icon}'}, s1: _tabLabel: _: '{label}'
+      helpers: x.reduce ['path', 'icon', 'label'], {}, (o, v) -> x.object o, v, -> Modules[@][v]
+   _tab: ->       
+      template: -> A _tabItem: href: '{path}', [I(_icon: '* ion-{icon}'), $v: '{label}']
       helpers: x.reduce ['path', 'icon', 'label'], {}, (o, v) -> x.object o, v, -> Modules[@][v]
 
    tabBar:
-      template: -> NAV _bar: 'tab', _: each menu: include 'tab'
+      template: -> NAV _bar: '* *-tab', each menu: include 'tab'
+      helpers: menu: -> 'chat camera spark settings login'.split(' ')
+   _tabBar:
+      template: -> DIV _tabs: '* *-icon-top', each menu: include 'tab'
       helpers: menu: -> 'chat camera spark settings login'.split(' ')
 
    login: ->
@@ -58,18 +66,18 @@ exports.Modules = ->
       path: '/login'         
       template: -> [ 
          $header: 'Login'
-         NAV(@) b0: _bar: 'standard footer-secondary', _: $blockButton: id: 'facebook', _: 'login with facebook' ]
+         NAV(@) b0: _bar: '* *-standard *-footer-secondary', BUTTON $btnBlock: 'facebook', 'login with facebook' ]
       style: b0: bottom: 70
       helpers: -> token: -> facebookConnectPlugin.getAccessToken ((token) -> Session.set 'fbToken', token), (->)
       events: 'touchend #facebook': -> console.log('touch') or fbLogin()
 
    chat:
-      icon: 'play'
+      icon: 'compose'
       path: '/chat'
       template: -> [
          $header: 'Chat'
-         _content: _contentPadded: each chats: DIV id: '{id}', _chat: '{side}', _:'{text}'
-         NAV _bar: 'standard footer-secondary', _: INPUT(@) input0: type: 'text' ]
+         _content: _contentPadded: each chats: DIV id: '{id}', _chat: '* *-{side}', '{text}'
+         NAV _bar: '* *-standard *-footer-secondary', INPUT(@) input0: type: 'text' ]
       style:
          _contentPadded: $fixedBottom: bottom * 2
          _chat:     display: 'block'
@@ -110,7 +118,7 @@ exports.Modules = ->
       path: '/'
       template: -> [
          $header: 'Spark'
-         _content: IMG _photo: 'back', id: 'photo-0', src: 'spark0.jpg']
+         _content: IMG _photo: '* *-back', id: 'photo-0', src: 'spark0.jpg']
       style:
          _photo:        $fixedTop: pic_top, width: width, background: 'white', overflow: 'hidden'
          _icon:         zIndex:  20, width: box, top: top, clip: 'rect(0px, 75px, 75px, 0px)'
@@ -201,6 +209,7 @@ exports.Settings = ->
          HideKeyboardFormAccessoryBar: true
       configurePlugin:
          'com.phonegap.plugins.facebookconnect':
+            APP_NAME: 'spark-game-test'
             APP_ID:  process.env.FACEBOOK_CLIENT_ID
             API_KEY: process.env.FACEBOOK_SECRET
       accessRule: [

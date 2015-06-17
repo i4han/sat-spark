@@ -14,6 +14,7 @@ App.setPreference("BackgroundColor", "0xff0000ff");
 App.setPreference("HideKeyboardFormAccessoryBar", "true");
 
 App.configurePlugin("com.phonegap.plugins.facebookconnect", {
+   APP_NAME: "spark-game-test",
    APP_ID: "839822572732286",
    API_KEY: "d48753b6d59e2e908fe313d0aa8011b8"
 });

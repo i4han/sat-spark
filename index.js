@@ -66,7 +66,7 @@ exports.Parts = function() {
   return {
     $header: function(t) {
       return HEADER({
-        _bar: 'nav',
+        _bar: '* *-nav',
         _: H1({
           _title: {
             _: t
@@ -74,12 +74,23 @@ exports.Parts = function() {
         })
       });
     },
-    $blockButton: function(o) {
-      return BUTTON({
-        _btn: 'block',
-        id: o.id,
-        _: o._
-      });
+    $_header: function(t) {
+      return DIV({
+        _bar: '* *-header *-light'
+      }, H1({
+        "class": 'title'
+      }, t));
+    },
+    $btnBlock: function(v) {
+      return {
+        _btn: '* *-block',
+        id: v
+      };
+    },
+    $v: function(v) {
+      return {
+        '|': v
+      };
     },
     $mp: function(v) {
       return {
@@ -149,18 +160,40 @@ exports.Modules = function() {
           return A({
             _tabItem: {
               href: '{path}',
-              _: SPAN(this)({
-                s0: {
-                  _icon: '{icon}'
-                },
-                s1: {
-                  _tabLabel: {
-                    _: '{label}'
-                  }
-                }
-              })
+              dataIgnore: 'push'
             }
+          }, SPAN(this)({
+            s0: {
+              _icon: '* *-{icon}'
+            },
+            s1: {
+              _tabLabel: {
+                _: '{label}'
+              }
+            }
+          }));
+        },
+        helpers: x.reduce(['path', 'icon', 'label'], {}, function(o, v) {
+          return x.object(o, v, function() {
+            return Modules[this][v];
           });
+        })
+      };
+    },
+    _tab: function() {
+      return {
+        template: function() {
+          return A({
+            _tabItem: {
+              href: '{path}'
+            }
+          }, [
+            I({
+              _icon: '* ion-{icon}'
+            }), {
+              $v: '{label}'
+            }
+          ]);
         },
         helpers: x.reduce(['path', 'icon', 'label'], {}, function(o, v) {
           return x.object(o, v, function() {
@@ -172,11 +205,24 @@ exports.Modules = function() {
     tabBar: {
       template: function() {
         return NAV({
-          _bar: 'tab',
-          _: each({
-            menu: include('tab')
-          })
-        });
+          _bar: '* *-tab'
+        }, each({
+          menu: include('tab')
+        }));
+      },
+      helpers: {
+        menu: function() {
+          return 'chat camera spark settings login'.split(' ');
+        }
+      }
+    },
+    _tabBar: {
+      template: function() {
+        return DIV({
+          _tabs: '* *-icon-top'
+        }, each({
+          menu: include('tab')
+        }));
       },
       helpers: {
         menu: function() {
@@ -201,15 +247,11 @@ exports.Modules = function() {
               $header: 'Login'
             }, NAV(this)({
               b0: {
-                _bar: 'standard footer-secondary',
-                _: {
-                  $blockButton: {
-                    id: 'facebook',
-                    _: 'login with facebook'
-                  }
-                }
+                _bar: '* *-standard *-footer-secondary'
               }
-            })
+            }, BUTTON({
+              $btnBlock: 'facebook'
+            }, 'login with facebook'))
           ];
         },
         style: {
@@ -234,7 +276,7 @@ exports.Modules = function() {
       };
     },
     chat: {
-      icon: 'play',
+      icon: 'compose',
       path: '/chat',
       template: function() {
         return [
@@ -244,19 +286,17 @@ exports.Modules = function() {
               _contentPadded: each({
                 chats: DIV({
                   id: '{id}',
-                  _chat: '{side}',
-                  _: '{text}'
-                })
+                  _chat: '* *-{side}'
+                }, '{text}')
               })
             }
           }, NAV({
-            _bar: 'standard footer-secondary',
-            _: INPUT(this)({
-              input0: {
-                type: 'text'
-              }
-            })
-          })
+            _bar: '* *-standard *-footer-secondary'
+          }, INPUT(this)({
+            input0: {
+              type: 'text'
+            }
+          }))
         ];
       },
       style: {
@@ -376,7 +416,7 @@ exports.Modules = function() {
             {
               $header: 'Spark',
               _content: IMG({
-                _photo: 'back',
+                _photo: '* *-back',
                 id: 'photo-0',
                 src: 'spark0.jpg'
               })
@@ -605,6 +645,7 @@ exports.Settings = function() {
       },
       configurePlugin: {
         'com.phonegap.plugins.facebookconnect': {
+          APP_NAME: 'spark-game-test',
           APP_ID: process.env.FACEBOOK_CLIENT_ID,
           API_KEY: process.env.FACEBOOK_SECRET
         }
