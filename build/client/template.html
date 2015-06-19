@@ -1,0 +1,112 @@
+<template name="layout">
+   {{> yield}}
+   {{> tabBar}}
+</template>
+
+
+<template name="tab">
+   <a class="tab-item" href="{{path}}" data-ignore="push">
+      <span class="icon icon-{{icon}}"></span>
+      <span class="tab-label">
+         {{label}}
+      </span>
+   </a>
+</template>
+
+
+<template name="tabBar">
+   <nav class="bar bar-tab">
+      {{#each menu}}
+         {{> tab}}
+      {{/each}}
+   </nav>
+</template>
+
+
+<template name="login">
+   <header class="bar bar-nav">
+      <h1 class="title">
+         Login
+      </h1>
+   </header> 
+   <nav class="bar bar-standard bar-footer-secondary" id="login-b0">
+      <button class="btn btn-block" id="facebook">
+         login with facebook
+      </button>
+   </nav> 
+</template>
+
+
+<template name="settings">
+   <header class="bar bar-nav">
+      <h1 class="title">
+         Settings
+      </h1>
+   </header> 
+   <nav class="bar bar-standard bar-footer-secondary">
+      <button class="btn btn-block" id="logout">
+         logout
+      </button>
+   </nav> 
+</template>
+
+
+<template name="chat">
+   <header class="bar bar-nav">
+      <h1 class="title">
+         Chat
+      </h1>
+   </header> 
+   <div class="content">
+      <div class="content-padded">
+         {{#each chats}}
+            <div id="{{id}}" class="chat chat-{{side}}">
+               {{text}}
+            </div>
+         {{/each}}
+      </div>
+   </div> 
+   <nav class="bar bar-standard bar-footer-secondary">
+      <input type="text" id="chat-input0">
+   </nav> 
+</template>
+
+
+<template name="spark">
+   <header class="bar bar-nav">
+      <h1 class="title">
+         Spark
+      </h1>
+   </header> 
+   <div class="content">
+      <img class="photo photo-back" id="photo-0" src="spark0.jpg">
+   </div> 
+</template>
+
+
+<template name="camera">
+   <header class="bar bar-nav">
+      <h1 class="title">
+         Camera
+      </h1>
+   </header> 
+   <img id="camera-photo" style="width:100%;"> 
+</template>
+
+
+<template name="chosenbox">
+   <div class="chosen-container" id="chosen-{{id}}" style="left:{{left}}px;">
+      <img id="chosen-box-{{id}}">
+   </div>
+</template>
+
+
+<template name="chosen">
+   <div id="chosen">
+      {{#each chosen}}
+         {{> chosenbox}}
+      {{/each}}
+   </div>
+</template>
+
+

@@ -74,6 +74,22 @@ exports.Parts = function() {
         })
       });
     },
+    $class: function(v) {
+      return DIV({
+        "class": v
+      });
+    },
+    $id: function(v) {
+      return DIV({
+        id: v
+      });
+    },
+    $content: function(v) {
+      return DIV({
+        "class": 'content',
+        _: v
+      });
+    },
     $btnBlock: function(v) {
       return {
         _btn: '* *-block',
@@ -91,12 +107,11 @@ exports.Parts = function() {
         padding: v
       };
     },
-    $aTab: function(v) {
+    $tabItem: function(v) {
       return {
-        _tabItem: {
-          href: v,
-          dataIgnore: 'push'
-        }
+        "class": 'tab-item',
+        href: v,
+        dataIgnore: 'push'
       };
     },
     $box: function(a) {
@@ -106,11 +121,11 @@ exports.Parts = function() {
       };
     },
     $padded: function(v) {
-      return {
-        _content: {
-          _contentPadded: v
-        }
-      };
+      return DIV({
+        "class": 'content'
+      }, DIV({
+        "class": 'content-padded'
+      }, v));
     },
     $subfooter: function(v) {
       return {
@@ -156,7 +171,7 @@ exports.Modules = function() {
     layout: function() {
       return {
         template: function() {
-          return include('yield', 'tabBar');
+          return $include('yield', 'tabBar');
         },
         head: function() {
           return [
@@ -172,14 +187,12 @@ exports.Modules = function() {
       return {
         template: function() {
           return A({
-            $aTab: '{path}'
+            $tabItem: '{path}'
           }, SPAN({
             _icon: '* *-{icon}'
           }), SPAN({
-            _tabLabel: {
-              _: '{label}'
-            }
-          }));
+            "class": 'tab-label'
+          }, '{label}'));
         },
         helpers: x.reduce(['path', 'icon', 'label'], {}, function(o, v) {
           return x.object(o, v, function() {
@@ -192,8 +205,8 @@ exports.Modules = function() {
       template: function() {
         return NAV({
           _bar: '* *-tab'
-        }, each({
-          menu: include('tab')
+        }, $each({
+          menu: $include('tab')
         }));
       },
       helpers: {
@@ -314,7 +327,7 @@ exports.Modules = function() {
         return [
           {
             $header: 'Chat',
-            $padded: each({
+            $padded: $each({
               chats: DIV({
                 id: '{id}',
                 _chat: '* *-{side}'
@@ -449,7 +462,7 @@ exports.Modules = function() {
           return [
             {
               $header: 'Spark',
-              _content: IMG({
+              $content: IMG({
                 _photo: '* *-back',
                 id: 'photo-0',
                 src: 'spark0.jpg'
@@ -605,15 +618,14 @@ exports.Modules = function() {
     },
     chosenbox: {
       template: function() {
-        return {
-          _chosenContainer: {
-            id: "chosen-{id}",
-            style: "left:{left}px;",
-            _: IMG({
-              id: "chosen-box-{id}"
-            })
-          }
-        };
+        return DIV({
+          _chosen: '*-container',
+          id: "chosen-{id}",
+          style: "left:{left}px;",
+          _: IMG({
+            id: "chosen-box-{id}"
+          })
+        });
       },
       style: {
         _chosenContainer: {
@@ -627,11 +639,11 @@ exports.Modules = function() {
     },
     chosen: {
       template: function() {
-        return {
-          '#chosen': each({
-            chosen: include('chosenbox')
-          })
-        };
+        return DIV({
+          id: 'chosen'
+        }, $each({
+          chosen: $include('chosenbox')
+        }));
       },
       helpers: {
         chosen: [0, 1, 2, 3, 4].map(function(i) {

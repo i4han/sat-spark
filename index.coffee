@@ -20,12 +20,15 @@ collections = ->
 
 exports.Parts = ->
    $header:      (t) -> HEADER _bar: '* *-nav', _: H1 _title: _: t
+   $class:       (v) -> DIV class: v
+   $id:          (v) -> DIV id: v
+   $content:     (v) -> DIV class: 'content', _: v
    $btnBlock:    (v) -> _btn: '* *-block', id: v
    $v:           (v) -> '|': v
    $mp:          (v) -> margin: v, padding: v
-   $aTab:        (v) -> _tabItem: href: v, dataIgnore: 'push'
+   $tabItem:     (v) -> class: 'tab-item', href: v, dataIgnore: 'push'
    $box:         (a) -> width: a[0], height: a[1]
-   $padded:      (v) -> _content: _contentPadded: v
+   $padded:      (v) -> DIV class: 'content', DIV class: 'content-padded', v
    $subfooter:   (v) -> _bar: '* *-standard *-footer-secondary', _: v
    $fixedTop:    (v) -> position: 'fixed', top: v
    $fixedBottom: (v) -> position: 'fixed', bottom: v
@@ -42,17 +45,17 @@ exports.Modules = ->
    pic_height = height - (pic_top + bottom)
 
    layout: ->
-      template: -> include 'yield', 'tabBar'
+      template: -> $include 'yield', 'tabBar'
       head: -> [
          META  name:'viewport', content:'width=device-width initial-scale=1.0, user-scalable=no'
          TITLE Settings.title ]
 
    tab: ->       
-      template: -> A $aTab: '{path}', SPAN(_icon: '* *-{icon}'), SPAN _tabLabel: _: '{label}'
+      template: -> A $tabItem: '{path}', SPAN(_icon: '* *-{icon}'), SPAN class: 'tab-label', '{label}'
       helpers: x.reduce ['path', 'icon', 'label'], {}, (o, v) -> x.object o, v, -> Modules[@][v]
 
    tabBar:
-      template: -> NAV _bar: '* *-tab', each menu: include 'tab'
+      template: -> NAV _bar: '* *-tab', $each menu: $include 'tab'
       helpers: menu: -> 'chat camera spark settings login'.split(' ')
 
    login: ->
@@ -99,7 +102,7 @@ exports.Modules = ->
    chat:
       icon: 'compose', path: '/chat'
       template: -> [
-         $header: 'Chat', $padded: each chats: DIV id: '{id}', _chat: '* *-{side}', '{text}'
+         $header: 'Chat', $padded: $each chats: DIV id: '{id}', _chat: '* *-{side}', '{text}'
          NAV $subfooter: INPUT(@) input0: type: 'text' ]
       style:
          _contentPadded: $fixedBottom: bottom * 2
@@ -142,7 +145,7 @@ exports.Modules = ->
       path: '/'
       template: -> [
          $header: 'Spark'
-         _content: IMG _photo: '* *-back', id: 'photo-0', src: 'spark0.jpg']
+         $content: IMG _photo: '* *-back', id: 'photo-0', src: 'spark0.jpg']
       style:
          _photo:        $fixedTop: pic_top, width: width, background: 'white', overflow: 'hidden'
          _icon:         zIndex:  20, width: box, top: top, clip: 'rect(0px, 75px, 75px, 0px)'
@@ -205,11 +208,11 @@ exports.Modules = ->
             @response.end "ok"
  
    chosenbox:
-      template: -> _chosenContainer: id: "chosen-{id}", style:"left:{left}px;", _: IMG id: "chosen-box-{id}"
+      template: -> DIV _chosen: '*-container', id: "chosen-{id}", style:"left:{left}px;", _: IMG id: "chosen-box-{id}"
       style: _chosenContainer: $fixedTop: top, $box: [box, box], zIndex: 200,  border: 3, overflowY: 'hidden'
 
    chosen:
-      template: -> '#chosen': each chosen: include 'chosenbox'
+      template: -> DIV id: 'chosen', $each chosen: $include 'chosenbox'
       helpers: chosen: [0..4].map (i) -> id: i, left: box * i
 
 
