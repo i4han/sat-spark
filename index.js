@@ -74,13 +74,6 @@ exports.Parts = function() {
         })
       });
     },
-    $_header: function(t) {
-      return DIV({
-        _bar: '* *-header *-light'
-      }, H1({
-        "class": 'title'
-      }, t));
-    },
     $btnBlock: function(v) {
       return {
         _btn: '* *-block',
@@ -98,10 +91,31 @@ exports.Parts = function() {
         padding: v
       };
     },
+    $aTab: function(v) {
+      return {
+        _tabItem: {
+          href: v,
+          dataIgnore: 'push'
+        }
+      };
+    },
     $box: function(a) {
       return {
         width: a[0],
         height: a[1]
+      };
+    },
+    $padded: function(v) {
+      return {
+        _content: {
+          _contentPadded: v
+        }
+      };
+    },
+    $subfooter: function(v) {
+      return {
+        _bar: '* *-standard *-footer-secondary',
+        _: v
       };
     },
     $fixedTop: function(v) {
@@ -158,42 +172,14 @@ exports.Modules = function() {
       return {
         template: function() {
           return A({
-            _tabItem: {
-              href: '{path}',
-              dataIgnore: 'push'
-            }
-          }, SPAN(this)({
-            s0: {
-              _icon: '* *-{icon}'
-            },
-            s1: {
-              _tabLabel: {
-                _: '{label}'
-              }
+            $aTab: '{path}'
+          }, SPAN({
+            _icon: '* *-{icon}'
+          }), SPAN({
+            _tabLabel: {
+              _: '{label}'
             }
           }));
-        },
-        helpers: x.reduce(['path', 'icon', 'label'], {}, function(o, v) {
-          return x.object(o, v, function() {
-            return Modules[this][v];
-          });
-        })
-      };
-    },
-    _tab: function() {
-      return {
-        template: function() {
-          return A({
-            _tabItem: {
-              href: '{path}'
-            }
-          }, [
-            I({
-              _icon: '* ion-{icon}'
-            }), {
-              $v: '{label}'
-            }
-          ]);
         },
         helpers: x.reduce(['path', 'icon', 'label'], {}, function(o, v) {
           return x.object(o, v, function() {
@@ -216,28 +202,7 @@ exports.Modules = function() {
         }
       }
     },
-    _tabBar: {
-      template: function() {
-        return DIV({
-          _tabs: '* *-icon-top'
-        }, each({
-          menu: include('tab')
-        }));
-      },
-      helpers: {
-        menu: function() {
-          return 'chat camera spark settings login'.split(' ');
-        }
-      }
-    },
     login: function() {
-      var fbLogin;
-
-      fbLogin = function() {
-        return facebookConnectPlugin.login(["public_profile"], (function() {
-          return console.log('fb connected');
-        }), (function() {}));
-      };
       return {
         icon: 'person',
         path: '/login',
@@ -247,11 +212,11 @@ exports.Modules = function() {
               $header: 'Login'
             }, NAV(this)({
               b0: {
-                _bar: '* *-standard *-footer-secondary'
+                $subfooter: BUTTON({
+                  $btnBlock: 'facebook'
+                }, 'login with facebook')
               }
-            }, BUTTON({
-              $btnBlock: 'facebook'
-            }, 'login with facebook'))
+            })
           ];
         },
         style: {
@@ -270,10 +235,77 @@ exports.Modules = function() {
         },
         events: {
           'touchend #facebook': function() {
-            return console.log('touch') || fbLogin();
+            return facebookConnectPlugin.login(['publish_actions'], (function() {
+              facebookConnectPlugin.getAccessToken((function(token) {
+                return Session.set('fbToken', token);
+              }), function(e) {
+                return console.log('Token fail', e);
+              });
+              facebookConnectPlugin.api('me', ['public_profile'], (function(data) {
+                return Session.set('fbProfile', data);
+              }), function(e) {
+                return console.log('API fail', e);
+              });
+              return facebookConnectPlugin.getLoginStatus((function(data) {
+                return console.log(data);
+              }), function(e) {
+                return console.log('Login Status fail', e);
+              });
+            }), function(e) {
+              console.log('Login fail', e);
+              facebookConnectPlugin.api('me', ['public_profile'], (function(data) {
+                console.log('fb Profile get', data);
+                return Session.set('fbProfile', data);
+              }), function(e) {
+                return console.log('API fail', e);
+              });
+              return facebookConnectPlugin.getLoginStatus((function(data) {
+                return console.log(data);
+              }), function(e) {
+                return console.log('Login Status fail', e);
+              });
+            });
           }
+        },
+        _onRendered: function() {
+          $.ajaxSetup({
+            cache: true
+          });
+          return $.getScript('//connect.facebook.net/en_US/sdk.js', function() {
+            FB.init({
+              appId: '839822572732286',
+              version: 'v2.3'
+            });
+            return FB.getLoginStatus(function(d) {
+              return console.log('FB login', d);
+            });
+          });
         }
       };
+    },
+    settings: {
+      icon: 'gear',
+      path: '/setting',
+      template: function() {
+        return [
+          {
+            $header: 'Settings'
+          }, NAV({
+            $subfooter: BUTTON({
+              $btnBlock: 'logout'
+            }, 'logout')
+          })
+        ];
+      },
+      events: {
+        'touchend #logout': function() {
+          return facebookConnectPlugin.logout((function() {
+            return Router.go('login');
+          }), (function(e) {
+            return console.log('logout error', e);
+          }));
+        }
+      }
     },
     chat: {
       icon: 'compose',
@@ -282,21 +314,19 @@ exports.Modules = function() {
         return [
           {
             $header: 'Chat',
-            _content: {
-              _contentPadded: each({
-                chats: DIV({
-                  id: '{id}',
-                  _chat: '* *-{side}'
-                }, '{text}')
-              })
-            }
+            $padded: each({
+              chats: DIV({
+                id: '{id}',
+                _chat: '* *-{side}'
+              }, '{text}')
+            })
           }, NAV({
-            _bar: '* *-standard *-footer-secondary'
-          }, INPUT(this)({
-            input0: {
-              type: 'text'
-            }
-          }))
+            $subfooter: INPUT(this)({
+              input0: {
+                type: 'text'
+              }
+            })
+          })
         ];
       },
       style: {
@@ -331,7 +361,7 @@ exports.Modules = function() {
         var _this = this;
 
         return {
-          'keypress [#input0]': function(e) {
+          'keypress <#input0>': function(e) {
             var Jinput, text;
 
             if (e.keyCode === 13 && (text = (Jinput = $(_this.Id('#input0'))).val())) {
@@ -387,22 +417,26 @@ exports.Modules = function() {
         photo = Settings.image_url + Matches[i].public_ids[0];
         return Jfront.switchClass('photo-back', 'photo-front', 0, function() {
           return $('#photo-' + (i + 1)).css({
-            left: 0..after(("<img id=photo-" + (i + 1) + " class=\"photo-back photo\" src=" + photo + ".jpg>").draggable({
-              axis: 'y'.on('touchstart', function(e) {
-                return Jfront.switchClass('photo-front', 'photo-touched', 100..on('touchend', function(e) {
-                  switch (false) {
-                    case !(e.target.y > pic_top + swipe):
-                      return push(i + 1) && pass(Jfront);
-                    case !(e.target.y < pic_top - swipe):
-                      return push(i + 1) && choose(Jfront);
-                    default:
-                      return Jfront.switchClass('photo-touched', 'photo-front', 100, function() {
-                        return Jfront.animate({
-                          top: pic_top
-                        }, 100);
-                      });
-                  }
-                }));
+            left: 0..after(IMG({
+              id: 'photo-' + (i + 1),
+              _photo: '* *-back',
+              src: photo + '.jpg'.draggable({
+                axis: 'y'.on('touchstart', function(e) {
+                  return Jfront.switchClass('photo-front', 'photo-touched', 100..on('touchend', function(e) {
+                    switch (false) {
+                      case !(e.target.y > pic_top + swipe):
+                        return push(i + 1) && pass(Jfront);
+                      case !(e.target.y < pic_top - swipe):
+                        return push(i + 1) && choose(Jfront);
+                      default:
+                        return Jfront.switchClass('photo-touched', 'photo-front', 100, function() {
+                          return Jfront.animate({
+                            top: pic_top
+                          }, 100);
+                        });
+                    }
+                  }));
+                })
               })
             }))
           });
@@ -607,17 +641,6 @@ exports.Modules = function() {
           };
         })
       }
-    },
-    settings: {
-      icon: 'gear',
-      path: '/setting',
-      template: function() {
-        return [
-          {
-            $header: 'Settings'
-          }, H2('Settings')
-        ];
-      }
     }
   };
 };
@@ -650,7 +673,7 @@ exports.Settings = function() {
           API_KEY: process.env.FACEBOOK_SECRET
         }
       },
-      accessRule: ['http://localhost/*', 'http://meteor.local/*', "http://" + local_ip + "/*", "ws://" + local_ip + "/*", "http://" + deploy_domain + "/*", "ws://" + deploy_domain + "/*", 'http://res.cloudinary.com/*', 'mongodb://ds031922.mongolab.com/*']
+      accessRule: ["http://localhost/*", "http://meteor.local/*", "http://" + local_ip + "/*", "http://connect.facebook.net/*", "http://*.facebook.com/*", "https://*.facebook.com/*", "ws://" + local_ip + "/*", "http://" + deploy_domain + "/*", "ws://" + deploy_domain + "/*", "http://res.cloudinary.com/*", "mongodb://ds031922.mongolab.com/*"]
     },
     deploy: {
       name: 'spark5',

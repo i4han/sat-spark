@@ -20,11 +20,13 @@ collections = ->
 
 exports.Parts = ->
    $header:      (t) -> HEADER _bar: '* *-nav', _: H1 _title: _: t
-   $_header:     (t) -> DIV _bar: '* *-header *-light', H1 class: 'title', t
    $btnBlock:    (v) -> _btn: '* *-block', id: v
    $v:           (v) -> '|': v
    $mp:          (v) -> margin: v, padding: v
+   $aTab:        (v) -> _tabItem: href: v, dataIgnore: 'push'
    $box:         (a) -> width: a[0], height: a[1]
+   $padded:      (v) -> _content: _contentPadded: v
+   $subfooter:   (v) -> _bar: '* *-standard *-footer-secondary', _: v
    $fixedTop:    (v) -> position: 'fixed', top: v
    $fixedBottom: (v) -> position: 'fixed', bottom: v
    $photoCard:   (v) -> background: 'white', borderRadius: 2, padding: v or '8px 6px', boxShadow: '1px 1px 5px 1px'
@@ -46,38 +48,59 @@ exports.Modules = ->
          TITLE Settings.title ]
 
    tab: ->       
-      template: -> A _tabItem: href: '{path}', dataIgnore: 'push', SPAN(@) s0: {_icon: '* *-{icon}'}, s1: _tabLabel: _: '{label}'
-      helpers: x.reduce ['path', 'icon', 'label'], {}, (o, v) -> x.object o, v, -> Modules[@][v]
-   _tab: ->       
-      template: -> A _tabItem: href: '{path}', [I(_icon: '* ion-{icon}'), $v: '{label}']
+      template: -> A $aTab: '{path}', SPAN(_icon: '* *-{icon}'), SPAN _tabLabel: _: '{label}'
       helpers: x.reduce ['path', 'icon', 'label'], {}, (o, v) -> x.object o, v, -> Modules[@][v]
 
    tabBar:
       template: -> NAV _bar: '* *-tab', each menu: include 'tab'
       helpers: menu: -> 'chat camera spark settings login'.split(' ')
-   _tabBar:
-      template: -> DIV _tabs: '* *-icon-top', each menu: include 'tab'
-      helpers: menu: -> 'chat camera spark settings login'.split(' ')
 
    login: ->
-      fbLogin = -> facebookConnectPlugin.login ["public_profile"], (-> console.log 'fb connected'), (->)
-
-      icon: 'person'
-      path: '/login'         
-      template: -> [ 
-         $header: 'Login'
-         NAV(@) b0: _bar: '* *-standard *-footer-secondary', BUTTON $btnBlock: 'facebook', 'login with facebook' ]
+      icon: 'person', path: '/login'         
+      template: -> [$header: 'Login', NAV(@) b0: $subfooter: BUTTON $btnBlock: 'facebook', 'login with facebook']
       style: b0: bottom: 70
       helpers: -> token: -> facebookConnectPlugin.getAccessToken ((token) -> Session.set 'fbToken', token), (->)
-      events: 'touchend #facebook': -> console.log('touch') or fbLogin()
+      events: 'touchend #facebook': -> # api(graphPath, permissions, s, f) getLoginStatus logEvent name, params, valueToSum logPurchase logout showDialog options
+         facebookConnectPlugin.login ['publish_actions'], (-> 
+            facebookConnectPlugin.getAccessToken ((token) -> 
+               Session.set 'fbToken', token
+            ), (e) -> console.log 'Token fail', e
+            facebookConnectPlugin.api 'me', ['public_profile'], ((data) ->
+               Session.set 'fbProfile', data
+            ), (e) -> console.log 'API fail', e
+            facebookConnectPlugin.getLoginStatus ((data) ->
+               console.log data
+            ), (e) -> console.log 'Login Status fail', e
+         ), (e) -> 
+            console.log 'Login fail', e
+            facebookConnectPlugin.api 'me', ['public_profile'], ((data) ->
+               console.log 'fb Profile get', data
+               Session.set 'fbProfile', data
+            ), (e) -> console.log 'API fail', e
+            facebookConnectPlugin.getLoginStatus ((data) ->
+               console.log data
+            ), (e) -> console.log 'Login Status fail', e
+      _onRendered: ->
+         $.ajaxSetup cache: true
+         $.getScript '//connect.facebook.net/en_US/sdk.js', ->
+            FB.init appId: '839822572732286', version: 'v2.3'
+            FB.getLoginStatus (d) -> console.log 'FB login', d
+
+   settings: 
+      icon: 'gear', path: '/setting'
+      template: -> [ 
+         $header: 'Settings'
+         NAV $subfooter: BUTTON $btnBlock: 'logout', 'logout' ]
+      events: 
+         'touchend #logout': -> facebookConnectPlugin.logout (->
+            Router.go 'login'
+         ), ((e) -> console.log 'logout error', e)
 
    chat:
-      icon: 'compose'
-      path: '/chat'
+      icon: 'compose', path: '/chat'
       template: -> [
-         $header: 'Chat'
-         _content: _contentPadded: each chats: DIV id: '{id}', _chat: '* *-{side}', '{text}'
-         NAV _bar: '* *-standard *-footer-secondary', INPUT(@) input0: type: 'text' ]
+         $header: 'Chat', $padded: each chats: DIV id: '{id}', _chat: '* *-{side}', '{text}'
+         NAV $subfooter: INPUT(@) input0: type: 'text' ]
       style:
          _contentPadded: $fixedBottom: bottom * 2
          _chat:     display: 'block'
@@ -87,7 +110,7 @@ exports.Modules = ->
          input0:    $fixedBottom: bottom, $box: ['100%', bottom], $mp:0, border: 0
       helpers: chats: -> db.Chats.find {}
       events: ->
-         'keypress [#input0]': (e) =>
+         'keypress <#input0>': (e) =>
             if e.keyCode == 13 and text = (Jinput = $(@Id '#input0')).val()
                Jinput.val ''
                Meteor.call 'says', 'isaac', text
@@ -100,13 +123,14 @@ exports.Modules = ->
       setImage = (id, i) -> Session.set 'img-photo-id', Matches[i].public_ids[0]
       pass   = (J) -> J.animate top: '+=1000', 600, -> J.remove()
       choose = (J) -> J.animate top: top, width: box, left: box * icon_index++, clip: 'rect(0px, 75px, 75px, 0px)', 500, -> J.switchClass 'photo-touched', 'icon', 300
+      
       push   = (i) =>
          loaded = true
          Jfront = $('#photo-' + i)
          photo = Settings.image_url + Matches[i].public_ids[0]
          Jfront
             .switchClass 'photo-back', 'photo-front', 0, -> $('#photo-' + (i + 1)).css left: 0
-            .after "<img id=photo-#{i + 1} class=\"photo-back photo\" src=#{photo}.jpg>"
+            .after IMG id:'photo-' + (i + 1), _photo: '* *-back', src: photo + '.jpg'
             .draggable axis: 'y'
             .on 'touchstart', (e) -> Jfront.switchClass 'photo-front', 'photo-touched', 100
             .on 'touchend',   (e) -> switch
@@ -188,7 +212,6 @@ exports.Modules = ->
       template: -> '#chosen': each chosen: include 'chosenbox'
       helpers: chosen: [0..4].map (i) -> id: i, left: box * i
 
-   settings: icon: 'gear', path: '/setting', template: -> [ $header: 'Settings', H2 'Settings' ]
 
 
 exports.Settings = ->
@@ -213,14 +236,17 @@ exports.Settings = ->
             APP_ID:  process.env.FACEBOOK_CLIENT_ID
             API_KEY: process.env.FACEBOOK_SECRET
       accessRule: [
-         'http://localhost/*'
-         'http://meteor.local/*'
+         "http://localhost/*"
+         "http://meteor.local/*"
          "http://#{local_ip}/*"
+         "http://connect.facebook.net/*"
+         "http://*.facebook.com/*"
+         "https://*.facebook.com/*"
          "ws://#{local_ip}/*"
          "http://#{deploy_domain}/*"
          "ws://#{deploy_domain}/*"
-         'http://res.cloudinary.com/*'
-         'mongodb://ds031922.mongolab.com/*']
+         "http://res.cloudinary.com/*"
+         "mongodb://ds031922.mongolab.com/*"]
    deploy:
       name: 'spark5' #sparkgame spark[1-5]
       mobileServer: 'http://spark5.meteor.com'

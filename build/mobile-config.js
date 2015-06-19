@@ -22,6 +22,9 @@ App.configurePlugin("com.phonegap.plugins.facebookconnect", {
 App.accessRule("http://localhost/*");
 App.accessRule("http://meteor.local/*");
 App.accessRule("http://192.168.1.78/*");
+App.accessRule("http://connect.facebook.net/*");
+App.accessRule("http://*.facebook.com/*");
+App.accessRule("https://*.facebook.com/*");
 App.accessRule("ws://192.168.1.78/*");
 App.accessRule("http://spark5.meteor.com/*");
 App.accessRule("ws://spark5.meteor.com/*");

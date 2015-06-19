@@ -6,17 +6,14 @@
 
 isaac:early-bird
 meteor-platform
-stylus
-mquandalle:jade
-mizzao:jquery-ui
-mizzao:bootstrap-3
-jquery
 http
-fortawesome:fontawesome
+iron:router@1.0.9
+mquandalle:jade
+stylus
+jquery
+mizzao:jquery-ui
 accounts-password
 isaac:cubesat@0.4.21
 pcjpcj2:ratchet
-iron:router@1.0.9
-accounts-facebook
 
 
