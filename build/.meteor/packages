@@ -8,12 +8,9 @@ isaac:early-bird
 meteor-platform
 http
 iron:router@1.0.9
-mquandalle:jade
-stylus
 jquery
 mizzao:jquery-ui
-accounts-password
 isaac:cubesat@0.4.21
-pcjpcj2:ratchet
-
-
+meteoric:ionic
+isaac:atomic
+coffeescript
