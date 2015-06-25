@@ -1,0 +1,15 @@
+<template name="hello">
+  {{#if hello}}
+     <p>a</p>
+  {{else}}
+     <p>b</p>
+  {{/if}}
+</template>
+
+<template name = "selectFrame">
+    <div class = "container">
+        <div class = "frameCarousel">
+            {{> Template.dynamic template=active data=this}}
+        </div>
+    </div>
+</template>

@@ -51,24 +51,25 @@ exports.Modules = ->
 
    layout: ->
       template: ->
+         cube.Head  @,
+            html.META  @, name:'viewport', content:'{content}'
+            html.TITLE @, Settings.title
          ionic.Body @, 
             ionic.NavBar  @, class: 'bar-royal' 
             ionic.NavView @, blaze.Include @, 'yield'
             blaze.Include @, 'tabs'
-      head: -> [
-         html.META  @, name:'viewport', content:'width=device-width initial-scale=1.0, user-scalable=no'
-         html.TITLE @, Settings.title ]
+      helpers: content: -> 'width=device-width initial-scale=1.0, user-scalable=no'
 
    tabs:    
       template: -> 
-         ionic.Tabs      @, _tabs: '*-icon-top', 
+         ionic.Tabs @, _tabs: '*-icon-top', 
             blaze.Each   @, 'tabs', =>
                ionic.Tab @, title: '{label}', path: '{name}', iconOff: '{icon}', iconOn: '{icon}'
       helpers: 
          tabs: -> 'chat camera spark settings profile'.split(' ').map (a) -> Modules[a]
 
    profile: ->
-      icon: 'person', path: 'profile'         
+      icon: 'person', path: 'profile'
       template: -> [
          part.title    @, 'Profile'
          ionic.Content @, 
@@ -81,7 +82,7 @@ exports.Modules = ->
                         ionic.Icon @, icon: 'ios-telephone'
          ionic.SubfooterBar @, 
             html.BUTTON     @, $btnBlock: 'facebook', 'login with facebook' ]
-      style: b0: bottom: 70
+      style$: b0: bottom: 70
       helpers:
          items: -> [
             {title:'hello', content:'world'}
@@ -132,15 +133,15 @@ exports.Modules = ->
          ), ((e) -> console.log 'logout error', e)
 
    chat:
-      icon: 'chatbubbles', path: 'chat'
+      icon: 'chatbubbles', path: 'chat', hash: '0fcd'
       template: -> [
          part.title  @, 'Chat'
          html.DIV    @, class: 'content', 
             html.DIV @, class: 'content-padded',
                blaze.Each   @, 'chats', =>
                   html.DIV  @, id: '{id}', _chat: '* *-{side}', '{text}'
-         ionic.SubfooterBar @, html.INPUT @, id: 'chat-input0', type: 'text' ]
-      style:
+         ionic.SubfooterBar @, html.INPUT @, local: 'input0', type: 'text' ]
+      style$:
          _contentPadded: $fixedBottom: bottom * 2
          _chat:     display: 'block'
          _chatMe:   color: 'black'
@@ -149,7 +150,7 @@ exports.Modules = ->
          input0:    $fixedBottom: bottom, $box: ['100%', bottom], $mp:0, border: 0
       helpers: chats: -> db.Chats.find {}
       events: ->
-         'keypress _[#input0]': (e) =>
+         'keypress {#input0}': (e) =>
             if e.keyCode == 13 and text = (Jinput = $(@Id '#input0')).val()
                Jinput.val ''
                Meteor.call 'says', 'isaac', text
@@ -168,10 +169,10 @@ exports.Modules = ->
          Jfront = $('#photo-' + i)
          photo = Settings.image_url + Matches[i].public_ids[0]
          Jfront
-            .switchClass 'photo-back', 'photo-front', 0, -> $('#photo-' + (i + 1)).css left: 0
-            .after HTML.toHTML html.IMG @, id:'photo-' + (i + 1), _photo: '* *-back', src: photo + '.jpg'
-            .draggable axis: 'y'
-            .on 'touchstart', (e) -> Jfront.switchClass 'photo-front', 'photo-touched', 100
+            .switchClass('photo-back', 'photo-front', 0, -> $('#photo-' + (i + 1)).css left: 0)
+            .after(HTML.toHTML html.IMG @, id:'photo-' + (i + 1), _photo: '* *-back', src: photo + '.jpg')
+            .draggable(axis: 'y')
+            .on('touchstart', (e) -> Jfront.switchClass 'photo-front', 'photo-touched', 100)
             .on 'touchend',   (e) -> switch
                when e.target.y > pic_top + swipe then push(i + 1) and pass   Jfront
                when e.target.y < pic_top - swipe then push(i + 1) and choose Jfront
@@ -182,7 +183,7 @@ exports.Modules = ->
          part.title  @, 'Spark'
          html.DIV    @, class: 'content', 
             html.IMG @, _photo: '* *-back', id: 'photo-0', src: 'spark0.jpg']
-      style:
+      style$:
          _photo:        $fixedTop: pic_top, width: width, background: 'white', overflow: 'hidden'
          _icon:         zIndex:  20, width: box, top: top, clip: 'rect(0px, 75px, 75px, 0px)'
          _photoFront:   zIndex:  10, top: pic_top  
@@ -246,7 +247,7 @@ exports.Modules = ->
       template: -> 
          html.DIV @, _chosen: '*-container', id: "chosen-{id}", style:"left:{left}px;", 
             html.IMG @, id: "chosen-box-{id}"
-      style: _chosenContainer: $fixedTop: top, $box: [box, box], zIndex: 200,  border: 3, overflowY: 'hidden'
+      style$: _chosenContainer: $fixedTop: top, $box: [box, box], zIndex: 200,  border: 3, overflowY: 'hidden'
 
    chosen:
       template: -> 
@@ -263,7 +264,7 @@ exports.Settings = ->
    app:
       info:
          id: 'com.spark.game'
-         name: 'Spark game'
+         name: -> @title
          description: 'Spark game long name.'
          website: 'http://sparkgame.com'
       icons:
@@ -293,7 +294,7 @@ exports.Settings = ->
       name: 'spark5' #sparkgame spark[1-5]
       mobileServer: 'http://spark5.meteor.com'
 
-   title: -> @app.info.name
+   title: "Spark Game"
    theme: "clean"
    lib:   "ui"
    env:
@@ -302,7 +303,8 @@ exports.Settings = ->
    npm:
       busboy:     "0.2.9"
       cloudinary: "1.2.1"
-   public: 
+   public:
+      title: -> @title
       collections: {}
       image_url: "http://res.cloudinary.com/sparks/image/upload/"
       upload: "http://#{local_ip}:3000/upload"
