@@ -20,20 +20,10 @@ collections = ->
 
 exports.Parts = ->
    title:        (_, v) -> blaze.Include _, 'contentFor', headerTitle: '', html.H1 _, class: 'title', v
-   $header1:     (t) -> HEADER @, _bar: '* *-nav', _: H1 @, _title: _: t
-   $header2:     (t) -> DIV @, _bar: '* *-header *-light', _: H1 @, class: 'title', t
-   $class:       (v) -> DIV @, class: v
-   $id:          (v) -> DIV @, id: v
-   $header:      (v) -> 
-      blaze.include @, 'contentFor', headerTitle: '', H1 @, class: 'title', v.title
-      #v.left  and blaze.include @, 'contentFor', headerButtonLeft:  '', v.left
-      #v.right and blaze.include @, 'contentFor', headerButtonRight: '', v.right 
-   $content:     (v) -> DIV @, class: 'content', _: v
    $btnBlock:    (v) -> _button: '* *-block', id: v
    $mp:          (v) -> margin: v, padding: v
    $tabItem:     (v) -> class: 'tab-item', href: v, dataIgnore: 'push'
    $box:         (a) -> width: a[0], height: a[1]
-   $padded:      (v) -> DIV @, class: 'content', DIV @, class: 'content-padded', v
    $subfooter:   (v) -> _bar: '* *-standard *-footer-secondary', _: v
    $fixedTop:    (v) -> position: 'fixed', top: v
    $fixedBottom: (v) -> position: 'fixed', bottom: v
@@ -59,14 +49,15 @@ exports.Modules = ->
             ionic.NavView @, blaze.Include @, 'yield'
             blaze.Include @, 'tabs'
       helpers: content: -> 'width=device-width initial-scale=1.0, user-scalable=no'
+      $Ready: -> 
+         (new x.Style '.bar-subfooter').set bottom: 48, height: 50
 
    tabs:    
       template: -> 
          ionic.Tabs @, _tabs: '*-icon-top', 
             blaze.Each   @, 'tabs', =>
                ionic.Tab @, title: '{label}', path: '{name}', iconOff: '{icon}', iconOn: '{icon}'
-      helpers: 
-         tabs: -> 'chat camera spark settings profile'.split(' ').map (a) -> Modules[a]
+      helpers: tabs: -> 'chat camera spark settings profile'.split(' ').map (a) -> Modules[a]
 
    profile: ->
       icon: 'person', path: 'profile'
@@ -82,7 +73,6 @@ exports.Modules = ->
                         ionic.Icon @, icon: 'ios-telephone'
          ionic.SubfooterBar @, 
             html.BUTTON     @, $btnBlock: 'facebook', 'login with facebook' ]
-      style$: b0: bottom: 70
       helpers:
          items: -> [
             {title:'hello', content:'world'}
@@ -122,11 +112,19 @@ exports.Modules = ->
       template: -> [ 
          part.title @, 'Settings'
          ionic.View @, 
-            ionic.Content   @, 
-               html.P       @, 'hello world!'
+            ionic.Content @, 
+               html.P     @, 'hello world!'
+               blaze.If   @, 'go', 
+                  => [
+                     html.P @, 'ok go'
+                     html.P @, 'Thanks']
+                  => [
+                     html.P @, 'oops. no go'
+                     html.P @, 'I can wait.']
          ionic.SubfooterBar @, 
             html.BUTTON     @, $btnBlock: 'logout', 'logout'
       ]
+      helpers: go: -> Session.get 'go'
       events: 
          'touchend #logout': -> facebookConnectPlugin.logout (->
             Router.go 'profile'
@@ -141,17 +139,17 @@ exports.Modules = ->
                blaze.Each   @, 'chats', =>
                   html.DIV  @, id: '{id}', _chat: '* *-{side}', '{text}'
          ionic.SubfooterBar @, html.INPUT @, local: 'input0', type: 'text' ]
-      style$:
+      style:
          _contentPadded: $fixedBottom: bottom * 2
          _chat:     display: 'block'
          _chatMe:   color: 'black'
          _chatYou:  marginLeft: 20
-         _chatRead: color: 'grey' 
-         input0:    $fixedBottom: bottom, $box: ['100%', bottom], $mp:0, border: 0
+         _chatRead: color: 'black' 
+         local_input0:  $box: ['100%', 33], $mp:0, border: 0
       helpers: chats: -> db.Chats.find {}
       events: ->
-         'keypress {#input0}': (e) =>
-            if e.keyCode == 13 and text = (Jinput = $(@Id '#input0')).val()
+         'keypress {local #input0}': (e) =>
+            if e.keyCode == 13 and text = (Jinput = $(@local '#input0')).val()
                Jinput.val ''
                Meteor.call 'says', 'isaac', text
       methods: says: (id, text) -> db.Chats.insert id: id, text: text
@@ -183,7 +181,7 @@ exports.Modules = ->
          part.title  @, 'Spark'
          html.DIV    @, class: 'content', 
             html.IMG @, _photo: '* *-back', id: 'photo-0', src: 'spark0.jpg']
-      style$:
+      style:
          _photo:        $fixedTop: pic_top, width: width, background: 'white', overflow: 'hidden'
          _icon:         zIndex:  20, width: box, top: top, clip: 'rect(0px, 75px, 75px, 0px)'
          _photoFront:   zIndex:  10, top: pic_top  
@@ -247,7 +245,7 @@ exports.Modules = ->
       template: -> 
          html.DIV @, _chosen: '*-container', id: "chosen-{id}", style:"left:{left}px;", 
             html.IMG @, id: "chosen-box-{id}"
-      style$: _chosenContainer: $fixedTop: top, $box: [box, box], zIndex: 200,  border: 3, overflowY: 'hidden'
+      style: _chosenContainer: $fixedTop: top, $box: [box, box], zIndex: 200,  border: 3, overflowY: 'hidden'
 
    chosen:
       template: -> 
