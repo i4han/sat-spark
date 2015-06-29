@@ -11,7 +11,6 @@ iron:router@1.0.9
 jquery
 mizzao:jquery-ui
 isaac:cubesat@0.4.21
-meteoric:ionic
 isaac:atomic
 coffeescript
 msavin:mongol
