@@ -114,6 +114,7 @@ s1.add cube.Settings ->
       cloudinary: "1.2.1"
    public:
       title: -> @title
+      fbAppId: -> process.env.FACEBOOK_CLIENT_ID
       collections: {}
       image_url: "http://res.cloudinary.com/sparks/image/upload/"
       upload: "http://#{local_ip}:3000/upload"

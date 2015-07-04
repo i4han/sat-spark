@@ -24,7 +24,13 @@ c1.add cube.Module('layout'
       ionic.NavBar  @, class: 'bar-royal'
       ionic.NavView @, blaze.Include @, 'yield'
       blaze.Include @, 'tabs'
-).onStartup(-> style$('.bar-subfooter').set bottom:48, height: 62
+).onStartup(->
+   console.log 'FB', FB
+   FB.init appId: Sat.setting.public.fbAppId, xfbml: false, version: 'v2.3', status: true
+   style$('.bar-subfooter').set bottom:48, height: 62
+   #style$('.range input::-webkit-slider-thumb::after')
+   #   .set backgroundColor: '#387ef5', left: 28, width: 1000, top: 13, padding: 0, height: 2
+
 ).close()
 
 
@@ -43,7 +49,7 @@ c1.add cube.Module('profile'
    icon: 'person'
    path: 'profile'
 ).template(-> [
-   part.title    @, 'Profile'
+   part.title    @, 'Profiles'
    ionic.Content @,
       ionic.List @, class: 'profile',
          blaze.Each    @, 'items', =>
@@ -92,27 +98,62 @@ c1.add cube.Module('settings'
    path: 'settings'
 ).template(-> [
    part.title @, 'Settings'
-   ionic.View @,
-      ionic.Content @,
-         html.P     @, id: 'hw',  'hello world!'
-         blaze.If   @, 'go',
-            => html.P @, 'ok go'
-            => html.P @, 'oops. no go'
-         cube.Switch  @,
-            Session.get('a') is 1, => html.P @, 'alpha'
-            Session.get('a') is 2, => html.P @, 'beta'
-            Session.get('a') is 3, => blaze.Include @, Session.get('b') or 'abc'
-            Session.get('a') is 4, => html.P @, 'delta'
-            => html.P @, 'somthing else'
-   ionic.SubfooterBar @,
-      html.BUTTON     @, $btnBlock: 'logout', 'logout'
+   ionic.Content @, ionic.List @,
+      ionic.Divider    @, 'General'
+      ionic.ItemToggle @, 'Online', 'hello'
+      ionic.Divider    @, 'Search'
+      ionic.ItemRange  @, 'Distance', name: 'distance', min: '0',  max: '200', value: '33', '0', '50 mi'
+      ionic.ItemList  @, 'Age',
+         ionic.Range  @, name: 'age', local: 'agefrom', min: '18', max: '80',  value: '25', '18', '80'
+         ionic.Range  @, name: 'age', local: 'ageto', min: '18', max: '80',  value: '25', '18', '80'
+      ionic.ItemSelect @, 'Language', 'Korean', ['English', 'Spanish', 'Chinese', 'Korean', 'Japanese']
+      ionic.ItemSelect @, 'Search for', 'woman', ['woman', 'man', 'both']
+      ionic.Divider    @, 'Notification'
+      ionic.ItemToggle @, 'New matches', 'new-matches'
+      ionic.ItemToggle @, 'Messages',    'message'
+   ionic.SubfooterBar  @,
+      html.BUTTON @, $btnBlock: 'logout', 'logout'
    ]
-).helpers(-> go: -> Session.get 'go'
+).styles(->
+   'local_agefrom::-webkit-slider-thumb::after': backgroundColor: '#387ef5', left: 28, width: 1000, top: 13, padding: 0, height: 3
+   'local_agefrom::-webkit-slider-thumb::before': height: 0
+   'local_ageto::-webkit-slider-thumb::before':   height: 2.0
+).helpers(->
+   go: -> Session.get 'go'
+   login: -> Session.get 'loginStatus'
 ).events(->
    'touchend #logout': -> facebookConnectPlugin.logout (->
-      Router.go 'profile'
-   ), ((e) -> console.log 'logout error', e)
+         Router.go 'profile'
+      ), (e) -> console.log 'logout error', e
+   'change #hello': (evnt) -> console.log evnt
+).onCreated(->
+   _ = __.module @
+   _.style$ageFrom = style$(_.local('#agefrom') + '::-webkit-slider-thumb::after')
+   _.style$ageTo   = style$(_.local('#ageto')   + '::-webkit-slider-thumb::before')
+).onRendered(->
+   _ = __.module @
+   _.unit = (_.$('#agefrom').width() - 28) / (80 - 18)
+   _.$('#agefrom').on 'input', (evt) =>
+      if (val = evt.target.value) > (toVal = ($ageTo = _.$ '#ageto').val()) then $ageTo.val(val)
+      else _.rangeSync val, toVal
+   _.$('#ageto'  ).on 'input', (evt) =>
+      if (val = evt.target.value) < (fromVal = ($ageFrom = _.$ '#agefrom').val()) then $ageFrom.val(val)
+      else _.rangeSync fromVal, val
+
+   FB.getLoginStatus (res) -> if res.status is 'connected' then console.log 'logged in' else FB.login()
+   #facebookConnectPlugin.getLoginStatus ((o)->
+   #   Session.set 'loginStatus', o
+   #   console.log 'loginStatus', o
+   #), (f) -> console.log 'loginStatus Error', f
+).fn(
+   rangeSync: (from, to) ->
+      @style$ageFrom.set width: (to - from - 1) * @unit
+      @style$ageTo  .set width: width = (to - from - 1) * @unit, left: -width
 ).close('settings')
+
+
+c1.add cube.Module('facebook'
+).template(-> '').close()
 
 
 c1.add cube.Module('abc').template(-> html.P @, 'ABC').close()
@@ -267,3 +308,28 @@ c1.add cube.Parts ->
 
 
 module.exports = c1 if !Meteor?
+
+###
+
+
+         html.P     @, id: 'hw',  'hello world!'
+         blaze.If   @, 'go',
+            => html.P @, 'ok go'
+            => html.P @, 'oops. no go'
+         cube.Switch  @,
+            Session.get('a') is 1, => html.P @, 'alpha'
+            Session.get('a') is 2, => html.P @, 'beta', '{login}'
+            Session.get('a') is 3, => blaze.Include @, Session.get('b') or 'abc'
+            Session.get('a') is 4, => html.P @, 'delta'
+            => html.P @, 'somthing else'
+
+style$('.range input::-webkit-slider-thumb::after')
+   .set backgroundColor: '#387ef5', left: 28, width: 1000, top: 13, padding: 0, height: 2
+style$('.range input::-webkit-slider-thumb::after').set('left', '28px')
+style$('.range input::-webkit-slider-thumb::after').set('width', '1000px')
+style$('.range input::-webkit-slider-thumb::after').set('top', '13px')
+style$('.range input::-webkit-slider-thumb::after').set('padding', '0')
+style$('.range input::-webkit-slider-thumb::after').set('height', '2px')
+
+
+###
