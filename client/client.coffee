@@ -19,7 +19,7 @@ c1.add cube.Module('layout'
       html.META @,
          name:    'viewport'
          content: 'width=device-width initial-scale=1.0, user-scalable=no'
-   html.TITLE @, Sat.setting.public.title
+      html.TITLE @, Sat.setting.public.title
    ionic.Body @,
       ionic.NavBar  @, class: 'bar-royal'
       ionic.NavView @, blaze.Include @, 'yield'
@@ -96,26 +96,25 @@ c1.add cube.Module('settings'
 ).properties(->
    icon: 'gear-a'
    path: 'settings'
-).template(-> [
-   part.title @, 'Settings'
-   ionic.Content @, ionic.List @,
-      ionic.Divider    @, 'General'
-      ionic.ItemToggle @, 'Online', 'hello'
-      ionic.Divider    @, 'Search'
-      ionic.ItemRange  @, 'Distance', name: 'distance', min: '0',  max: '200', value: '33', '0', '50 mi'
-      ionic.ItemList  @, 'Age',
-         ionic.Range  @, name: 'age', local: 'agefrom', min: '18', max: '80',  value: '25', '18', '80'
-         ionic.Range  @, name: 'age', local: 'ageto', min: '18', max: '80',  value: '25', '18', '80'
-      ionic.ItemSelect @, 'Language', 'Korean', ['English', 'Spanish', 'Chinese', 'Korean', 'Japanese']
-      ionic.ItemSelect @, 'Search for', 'woman', ['woman', 'man', 'both']
-      ionic.Divider    @, 'Notification'
-      ionic.ItemToggle @, 'New matches', 'new-matches'
-      ionic.ItemToggle @, 'Messages',    'message'
-   ionic.SubfooterBar  @,
-      html.BUTTON @, $btnBlock: 'logout', 'logout'
-   ]
+).template(->
+   cube.Template [v, _] = cube.View(@),
+      v.title 'Settings'
+      v.ionListContent '',
+         v.ionDivider    'General'
+         v.ionItemToggle 'Online', 'hello'
+         v.ionDivider    'Search'
+         v.ionItemRange  'Distance', name: 'distance', min: '0',  max: '200', value: '33', '0', '50 mi'
+         v.ionItemList   'Age',
+            v.ionRange   name: 'age', local: 'agefrom', min: '18', max: '80',  value: '25', '18', '80'
+            v.ionRange   name: 'age', local: 'ageto', min: '18', max: '80',  value: '25', '18', '80'
+         v.ionItemSelect 'Language', 'Korean', ['English', 'Spanish', 'Chinese', 'Korean', 'Japanese']
+         v.ionItemSelect 'Search for', 'woman', ['woman', 'man', 'both']
+         v.ionDivider    'Notification'
+         v.ionItemToggle 'New matches', 'new-matches'
+         v.ionItemToggle 'Messages',    'message'
+      v.ionSubfooterButton 'logout', 'logout'
 ).styles(->
-   'local_agefrom::-webkit-slider-thumb::after': backgroundColor: '#387ef5', left: 28, width: 1000, top: 13, padding: 0, height: 3
+   'local_agefrom::-webkit-slider-thumb::after':  backgroundColor: '#387ef5', left: 28, width: 1000, top: 13, padding: 0, height: 3
    'local_agefrom::-webkit-slider-thumb::before': height: 0
    'local_ageto::-webkit-slider-thumb::before':   height: 2.0
 ).helpers(->
@@ -125,21 +124,24 @@ c1.add cube.Module('settings'
    'touchend #logout': -> facebookConnectPlugin.logout (->
          Router.go 'profile'
       ), (e) -> console.log 'logout error', e
-   'change #hello': (evnt) -> console.log evnt
+   'change #hello': (evnt) =>
+      console.log $('#hello').prop('checked')
 ).onCreated(->
    _ = __.module @
    _.style$ageFrom = style$(_.local('#agefrom') + '::-webkit-slider-thumb::after')
    _.style$ageTo   = style$(_.local('#ageto')   + '::-webkit-slider-thumb::before')
 ).onRendered(->
    _ = __.module @
+   @$('#hello').prop('checked', true)
+   @$to = @$to or _.$ '#ageto'
+   @$from = @$from or _.$ '#agefrom'
    _.unit = (_.$('#agefrom').width() - 28) / (80 - 18)
-   _.$('#agefrom').on 'input', (evt) =>
-      if (val = evt.target.value) > (toVal = ($ageTo = _.$ '#ageto').val()) then $ageTo.val(val)
-      else _.rangeSync val, toVal
-   _.$('#ageto'  ).on 'input', (evt) =>
-      if (val = evt.target.value) < (fromVal = ($ageFrom = _.$ '#agefrom').val()) then $ageFrom.val(val)
-      else _.rangeSync fromVal, val
-
+   @$from.on 'input', (evt) =>
+      if (val = evt.target.value) > (to = @$to.val()) then @$to.val(val)
+      else _.rangeSync val, to
+   @$to.on 'input', (evt) =>
+      if (val = evt.target.value) < (from = @$from.val()) then @$from.val(val)
+      else _.rangeSync from, val
    FB.getLoginStatus (res) -> if res.status is 'connected' then console.log 'logged in' else FB.login()
    #facebookConnectPlugin.getLoginStatus ((o)->
    #   Session.set 'loginStatus', o
