@@ -26,7 +26,7 @@ iron:router@1.0.9
 iron:url@1.0.9
 isaac:absurd@0.1.0
 isaac:atomic@0.0.2
-isaac:cubesat@0.4.83
+isaac:cubesat@0.4.85
 isaac:early-bird@0.1.6
 isaac:jquery-x@0.0.5
 isaac:spark@0.0.4

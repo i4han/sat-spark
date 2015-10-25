@@ -25,12 +25,10 @@ c1.add cube.Module('layout'
       ionic.NavView @, blaze.Include @, 'yield'
       blaze.Include @, 'tabs'
 ).onStartup(->
-   console.log 'FB', FB
    FB.init appId: Sat.setting.public.fbAppId, xfbml: false, version: 'v2.3', status: true
    style$('.bar-subfooter').set bottom:48, height: 62
    #style$('.range input::-webkit-slider-thumb::after')
    #   .set backgroundColor: '#387ef5', left: 28, width: 1000, top: 13, padding: 0, height: 2
-
 ).close()
 
 
@@ -48,22 +46,20 @@ c1.add cube.Module('profile'
 ).properties(->
    icon: 'person'
    path: 'profile'
-).template(-> [
-   part.title    @, 'Profiles'
-   ionic.Content @,
-      ionic.List @, class: 'profile',
-         blaze.Each    @, 'items', =>
+).template(->
+   cube.Template [v, _] = cube.View(@),
+      v.title   'Profiles'
+      v.ionListContent '',
+         v.Each 'items', =>
             ionic.Item @, buttonRight: true,
                html.H2 @, 'title {title} content &#123; &#125; {content} works!'
-               html.P  @, cube.viewLookup @, 'content'
+               html.P  @, cube.lookupInView @, 'content'
                html.BUTTON   @, _button: '* *-positive',
                   ionic.Icon @, icon: 'ios-telephone'
-   ionic.SubfooterBar @,
-      html.BUTTON     @, $btnBlock: 'facebook', 'login with facebook'
-   ]
+      v.ionSubfooterButton id: 'facebook', 'login with facebook'
 ).helpers(->
    items: -> [
-      {title:'hello', content:'world6'}
+      {title:'hello6', content:'world6'}
       {title:'hello1', content:'world1'}
       {title:'hello2', content:'world2'}
       {title:'hello3', content:'world3'}
@@ -98,41 +94,40 @@ c1.add cube.Module('settings'
    path: 'settings'
 ).template(->
    cube.Template [v, _] = cube.View(@),
-      v.title 'Settings'
-      v.ionListContent '',
+      v.title _.property.label
+      v.ionListContent   '',
          v.ionDivider    'General'
-         v.ionItemToggle 'Online', 'hello'
+         v.ionItemLabelToggle 'Online', id: 'online'
          v.ionDivider    'Search'
-         v.ionItemRange  'Distance', name: 'distance', min: '0',  max: '200', value: '33', '0', '50 mi'
-         v.ionItemList   'Age',
+         v.ionItemLabelRange  'Distance', name: 'distance',  min: '0',  max: '200', value: '33', '0', '80 km'
+         v.ionItemLabelList   'Age',
             v.ionRange   name: 'age', local: 'agefrom', min: '18', max: '80',  value: '25', '18', '80'
-            v.ionRange   name: 'age', local: 'ageto', min: '18', max: '80',  value: '25', '18', '80'
-         v.ionItemSelect 'Language', 'Korean', ['English', 'Spanish', 'Chinese', 'Korean', 'Japanese']
-         v.ionItemSelect 'Search for', 'woman', ['woman', 'man', 'both']
+            v.ionRange   name: 'age', local: 'ageto',   min: '18', max: '80',  value: '25', '18', '80'
+         v.ionItemLabelSelect 'Language',   id: 'language',   'Korean', ['English', 'Spanish', 'Chinese', 'Korean', 'Japanese']
+         v.ionItemLabelSelect 'Search for', id: 'preference', 'woman',  ['woman', 'man', 'both']
          v.ionDivider    'Notification'
-         v.ionItemToggle 'New matches', 'new-matches'
-         v.ionItemToggle 'Messages',    'message'
-      v.ionSubfooterButton 'logout', 'logout'
+         v.ionItemLabelToggle 'New matches', id: 'new-matches'
+         v.ionItemLabelToggle 'Messages',    id: 'message'
+      v.ionSubfooterButton id:'logout', 'logout'
 ).styles(->
-   'local_agefrom::-webkit-slider-thumb::after':  backgroundColor: '#387ef5', left: 28, width: 1000, top: 13, padding: 0, height: 3
+   'local_agefrom::-webkit-slider-thumb::after':  backgroundColor: '#387ef5', left: 28, width: 1000, top: 13, padding: 0, height: 2
    'local_agefrom::-webkit-slider-thumb::before': height: 0
-   'local_ageto::-webkit-slider-thumb::before':   height: 2.0
+   'local_ageto::-webkit-slider-thumb::before':   height: 2.001
 ).helpers(->
-   go: -> Session.get 'go'
+   go:    -> Session.get 'go'
    login: -> Session.get 'loginStatus'
 ).events(->
    'touchend #logout': -> facebookConnectPlugin.logout (->
          Router.go 'profile'
       ), (e) -> console.log 'logout error', e
-   'change #hello': (evnt) =>
-      console.log $('#hello').prop('checked')
+   'change #hello': (evnt) => console.log $('#hello').prop('checked')
 ).onCreated(->
    _ = __.module @
    _.style$ageFrom = style$(_.local('#agefrom') + '::-webkit-slider-thumb::after')
    _.style$ageTo   = style$(_.local('#ageto')   + '::-webkit-slider-thumb::before')
 ).onRendered(->
    _ = __.module @
-   @$('#hello').prop('checked', true)
+   @$('#online').prop('checked', true)
    @$to = @$to or _.$ '#ageto'
    @$from = @$from or _.$ '#agefrom'
    _.unit = (_.$('#agefrom').width() - 28) / (80 - 18)
@@ -142,7 +137,7 @@ c1.add cube.Module('settings'
    @$to.on 'input', (evt) =>
       if (val = evt.target.value) < (from = @$from.val()) then @$from.val(val)
       else _.rangeSync from, val
-   FB.getLoginStatus (res) -> if res.status is 'connected' then console.log 'logged in' else FB.login()
+   #FB.getLoginStatus (res) -> if res.status is 'connected' then console.log 'logged in' else FB.login()
    #facebookConnectPlugin.getLoginStatus ((o)->
    #   Session.set 'loginStatus', o
    #   console.log 'loginStatus', o
@@ -154,8 +149,7 @@ c1.add cube.Module('settings'
 ).close('settings')
 
 
-c1.add cube.Module('facebook'
-).template(-> '').close()
+c1.add cube.Module('facebook').template(-> '').close()
 
 
 c1.add cube.Module('abc').template(-> html.P @, 'ABC').close()
@@ -239,7 +233,7 @@ do ->
    ).properties(->
       path: '/'
       icon: 'flash'
-   ).template(-> [
+   ).template(-> console.log 'PART', part ; [
       part.title  @, 'Spark'
       ionic.Content @,
          blaze.Include @, 'chosen'
