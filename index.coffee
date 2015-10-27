@@ -1,4 +1,5 @@
 
+
 global.cube = require 'cubesat' if !Meteor?
 
 s1 = cube.Cube()
