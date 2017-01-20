@@ -289,21 +289,11 @@ c1.add(cube.Module('chat').properties(function() {
   ];
 }).styles(function() {
   return {
-    _chat: {
-      display: 'block'
-    },
-    _chatMe: {
-      color: 'black'
-    },
-    _chatYou: {
-      marginLeft: 20
-    },
-    _chatRead: {
-      color: 'black'
-    },
-    local_chat: {
-      $fixedBottom: bottom * 2 + 10
-    },
+    _chat:      { display:    'block' },
+    _chatMe:    { color:      'black' },
+    _chatYou:   { marginLeft: 20      },
+    _chatRead:  { color:      'black' },
+    local_chat: { $fixedBottom: bottom * 2 + 10 },
     local_input0: {
       $box: ['100%', 33],
       $mp: 0,
