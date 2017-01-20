@@ -1,4 +1,4 @@
-
+# meteor@1.3 underscore2@0.4.85
 
 global.cube = require 'cubesat' if !Meteor?
 
