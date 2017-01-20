@@ -4,7 +4,6 @@ global.cube = require 'cubesat' if !Meteor?
 
 s1 = cube.Cube()
 
-
 s1.add cube.Module('chat'
 ).methods(->
    says: (id, text) -> db.Chats.insert id: id, text: text
@@ -33,7 +32,7 @@ s1.add cube.Module('spark'
                   publish:  -> db["fs.chunks"].find files_id: $in: @Files.fetch().map (a) -> a._id
                   callback: -> @Chunks = db['fs.chunks'].find({}).fetch()
 ).fn(
-   photoUrl: (i, j=0) -> Sat.setting.public.image_url + (@Matches or Matches)[i].public_ids[j] + '.jpg'
+   photoUrl: (i, j=0) -> Settings.image_url + (@Matches or Matches)[i].public_ids[j] + '.jpg'
 ).close('spark')
 
 

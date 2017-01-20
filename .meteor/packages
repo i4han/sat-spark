@@ -13,7 +13,6 @@ isaac:cubesat@0.4.21
 isaac:atomic
 coffeescript
 isaac:spark
-standard-minifiers
 meteor-base
 mobile-experience
 mongo
@@ -27,3 +26,6 @@ ejson
 spacebars
 check
 isaac:underscore2@0.4.14
+# standard-minifier-css@1.3.2
+# standard-minifier-js@1.2.1
+# shell-server@0.2.1
