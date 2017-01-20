@@ -65,7 +65,7 @@ s1.add cube.Module('camera'
 
 
 s1.add cube.Settings ->
-   local_ip      = '192.168.1.73'
+   local_ip      = '192.168.1.65'
    deploy_domain = 'spark5.meteor.com'
 
    app:
