@@ -12,6 +12,8 @@ let swipe  = 22
 let pic_top    = top + box
 let pic_height = height - (pic_top + bottom)
 
+console.log('client ************')
+
 c1.add(cube.Module('layout').template(function() {
   cube.Head(this,
     html.META(this, { name: 'viewport', content: 'width=device-width initial-scale=1.0, user-scalable=no'}),
@@ -250,6 +252,8 @@ c1.add(cube.Module('settings').properties(function() {
   }
 }).close('settings'));
 
+console.log('v ok') // remove
+
 c1.add(cube.Module('facebook').template(function() {
   return '';
 }).close());
@@ -432,6 +436,7 @@ c1.add(cube.Module('chosen').template(function() {
       }).on('touchstart', touchStart).on('touchend', touchEnd);
     };
   })(this);
+
   return c1.add(cube.Module('spark').properties(function() {
     return {
       path: '/',
@@ -608,4 +613,4 @@ c1.add(cube.Parts(function() {
   };
 }));
 
-typeof Meteor === "undefined" && (module.exports = c1)
+// typeof Meteor === "undefined" && (module.exports = c1)
