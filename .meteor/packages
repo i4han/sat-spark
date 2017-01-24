@@ -11,7 +11,6 @@ jquery@1.11.9
 mizzao:jquery-ui
 isaac:cubesat@0.4.21
 isaac:atomic
-coffeescript@1.2.4_2
 isaac:spark
 meteor-base@1.0.4
 mobile-experience@1.0.4

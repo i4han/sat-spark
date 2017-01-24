@@ -1,0 +1,22 @@
+{
+  "name": "sat-spark",
+  "version": "0.0.1",
+  "description": "test app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/i4han/sat-spark.git"
+  },
+  "keywords": [
+    "cubesat"
+  ],
+  "author": "Isaac Han",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/i4han/sat-spark/issues"
+  },
+  "homepage": "https://github.com/i4han/sat-spark#readme"
+}
