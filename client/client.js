@@ -1,7 +1,5 @@
 'use strict'
 
-typeof Meteor === "undefined" && (global.cube = require('cubesat'))
-
 let c1     = __.Cube()
 let width  = 375
 let height = 667

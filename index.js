@@ -1,10 +1,5 @@
 
-if ('undefined' === typeof Meteor) {
-    require('cubesat')
-} else module = {}              // module = {} in settings.js cubesat package didn't work.
-
-
-module.exports = __.Cube().add(
+exports = __.Cube().add(
 
   __.Module('chat').methods(() => ({
       says: (id, text) =>
@@ -133,12 +128,12 @@ module.exports = __.Cube().add(
           client_id: process.env.FACEBOOK_CLIENT_ID } } } }),
 
   __.Module('chart').collections(() => ({
-    Ticker:     {publish: () => __._db.Chart.find()},
-    Trade:      {publish: () => __._db.Chart.find()},
-    GroupOrder: {publish: () => __._db.Chart.find()} }))
+    Ticker:     {publish: () => __._db.Ticker.find()},
+    Trade:      {publish: () => __._db.Trade.find()},
+    GroupOrder: {publish: () => __._db.GroupOrder.find()} }))
 )
 
-__.isMeteorServer(() => __.meteorStartup(() => {
+false && __.isMeteorServer(() => __.meteorStartup(() => {
   const socket = require('socket.io-client')('https://websocket.btcchina.com/')
   const Fiber  = require('fibers')
   socket.emit('subscribe', 'marketdata_cnybtc')
