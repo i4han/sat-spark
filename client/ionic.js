@@ -13,7 +13,7 @@ ionTags.forEach(tag =>
       __.isUndefined(args[0]) ? cube.includeAttr (_, iTag, o) : cube.includeAttrBlock(_, iTag, o, () => args)
 })
 
-let ion = cube.Cube()
+let ion = __.Cube()
 /*
 ion.add(cube.Parts( function() {
   return ({
@@ -40,7 +40,7 @@ ion.add(cube.Parts( function() {
     If   (_, lookup, _then, _else) { return Blaze.If  (( () => cube.lookup(_, lookup)), _then, _else) }
   }) }))
 /*/
-ion.add(cube.Parts( function() {
+ion.add(__.Parts( function() {
   return {
     ionLabel:  (...args) => html.DIV.apply(null, args),
     ionToggle: (_, attr) =>

@@ -39,12 +39,12 @@ iron:router@1.1.1
 iron:url@1.0.11
 isaac:absurd@0.1.2
 isaac:atomic@0.0.2
-isaac:cubesat@0.6.7
+isaac:cubesat@0.6.14
 isaac:early-bird@0.1.6
 isaac:jquery-x@0.0.10
 isaac:spark@0.0.4
 isaac:style-query@0.0.11
-isaac:underscore2@0.5.1
+isaac:underscore2@0.5.14
 jquery@1.11.10
 launch-screen@1.0.11
 livedata@1.0.18

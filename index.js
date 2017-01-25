@@ -1,20 +1,22 @@
 
-if ('undefined' === typeof Meteor) global.cube = require('cubesat')
-else global.module = {}
+if ('undefined' === typeof Meteor) {
+    require('cubesat')
+} else module = {}              // module = {} in settings.js cubesat package didn't work.
 
-module.exports = cube.Cube().add(
 
-  cube.Module('chat').methods(() => ({
+module.exports = __.Cube().add(
+
+  __.Module('chat').methods(() => ({
       says: (id, text) =>
-        db.Chats.insert({
+        __._db.Chats.insert({
           id: id,
           text: text }) })
   ).collections({Chats: {}}
   ).close(),
 
-  cube.Module('spark').collections(() => ({
+  __.Module('spark').collections(function() { return {
       Users: {
-        publish: () => this.Matches = db.Users.find({
+        publish: () => this.Matches = __._db.Users.find({
             gender: 'F',
             public_ids: {$exists: true},
             location: {
@@ -24,27 +26,27 @@ module.exports = cube.Cube().add(
                   coordinates: [-118.3096648, 34.0655627] },
                 $maxDistance: 20000,
                 $minDistance: 0 }} }),
-        callback: () => {
-            window.Matches = db.Users.find({}).fetch()
+        callback: function(m) {
+            window.Matches = __._db.Users.find({}).fetch()
             Session.set('index', 0)
             Session.set('photo-front', this.photoUrl(0))
-            Session.set('photo-back', this.photoUrl(1)) },
+            Session.set('photo-back',  this.photoUrl(1)) },
         collections: {
           "fs.files": {
-            publish: () => this.Files = db["fs.files"].find({
+            publish: () => this.Files = __._db["fs.files"].find({
                 _id: { $in: this.Matches.fetch().reduce(((o, a) => o.concat(a.photo_ids) ), []) } }),
-            callback: () => this.Files = db['fs.files'].find({}).fetch(),
+            callback: (m) => this.Files = __._db['fs.files'].find({}).fetch(),
             collections: {
               "fs.chunks": {
-                publish: () => db["fs.chunks"].find({files_id: {$in: this.Files.fetch().map(a => a._id)}}),
-                callback: () => this.Chunks = db['fs.chunks'].find({}).fetch() } } } } } })
+                publish: () => __._db["fs.chunks"].find({files_id: {$in: this.Files.fetch().map(a => a._id)}}),
+                callback: (m) => this.Chunks = __._db['fs.chunks'].find({}).fetch() } } } } } }}
   ).fn({
     photoUrl: (i, j) => { // es6 feature j=0 is not yet supported
       if (j == null) {j = 0}
       return Settings.image_url + (this.Matches || Matches)[i].public_ids[j] + '.jpg' } }
   ).close('spark'),
 
-  cube.Module('camera').onServer(function() {
+  __.Module('camera').onServer(function() {
     const fs = Npm.require('fs')
     const Busboy = Spark.require('busboy')
     const cloud = Spark.require('cloudinary')
@@ -53,40 +55,30 @@ module.exports = cube.Cube().add(
       cloud_name: _.cloud_name,
       api_key:    _.api_key,
       api_secret: _.api_secret })
-    Router.onBeforeAction(function(req, res, next) {
-      var busboy, filenames;
+    Router.onBeforeAction((req, res, next) => {
+      var busboy, filenames
       filenames = []
       if (req.url === '/upload' && req.method === 'POST') {
         busboy = new Busboy({headers: req.headers})
-        busboy.on('file', function(field, file, filename) {
+        busboy.on('file', (field, file, filename) => {
           console.log('param', req)
           file.pipe(cloud.uploader.upload_stream(r => console.log('stream', r, req.body.id)))
-          return filenames.push(filename);
-        });
-        busboy.on('finish', function() {
-          req.filenames = filenames;
-          return next();
-        });
-        busboy.on('field', function(field, value) {
-          return req.body[field] = value;
-        });
-        return req.pipe(busboy);
+          filenames.push(filename) })
+        busboy.on('finish', () => {
+          req.filenames = filenames
+          next() })
+        busboy.on('field', (field, value) => req.body[field] = value)
+        req.pipe(busboy)
       } else {
-        return next();
-      }
-    });
-    return Router.route('/upload', {
-      where: 'server'
-    }).post(function() {
+        next() } })
+    Router.route('/upload', {where: 'server'}).post(function() {
       this.response.writeHead(200, {'Content-Type': 'text/plain'})
-      this.response.end("ok")
-    }) }
+      this.response.end("ok") }) }
   ).close(),
 
-  cube.Settings(() => {
-    var deploy_domain, local_ip
-    local_ip = '192.168.1.65'
-    deploy_domain = 'spark5.meteor.com'
+  __.Settings(() => {
+    const local_ip = '192.168.1.65'
+    const deploy_domain = 'spark5.meteor.com'
     return {
       app: {
         info: {
@@ -138,5 +130,20 @@ module.exports = cube.Cube().add(
               client_id: process.env.FACEBOOK_CLIENT_ID,
               redirect_uri: 'http://localhost:3000/home' } },
           secret: process.env.FACEBOOK_SECRET,
-          client_id: process.env.FACEBOOK_CLIENT_ID } } } })
+          client_id: process.env.FACEBOOK_CLIENT_ID } } } }),
+
+  __.Module('chart').collections(() => ({
+    Ticker:     {publish: () => __._db.Chart.find()},
+    Trade:      {publish: () => __._db.Chart.find()},
+    GroupOrder: {publish: () => __._db.Chart.find()} }))
 )
+
+__.isMeteorServer(() => __.meteorStartup(() => {
+  const socket = require('socket.io-client')('https://websocket.btcchina.com/')
+  const Fiber  = require('fibers')
+  socket.emit('subscribe', 'marketdata_cnybtc')
+  socket.emit('subscribe', 'grouporder_cnybtc')
+  socket.on('ticker',     data => __.db('Ticker',     data, (c, d) => Fiber(() => c.insert(d)).run()))
+  socket.on('trade',      data => __.db('Trade',      data, (c, d) => Fiber(() => c.insert(d)).run()))
+  socket.on('grouporder', data => __.db('GroupOrder', data, (c, d) => Fiber(() => c.insert(d)).run()))
+}) )

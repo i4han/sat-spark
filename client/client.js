@@ -2,7 +2,7 @@
 
 typeof Meteor === "undefined" && (global.cube = require('cubesat'))
 
-let c1     = cube.Cube()
+let c1     = __.Cube()
 let width  = 375
 let height = 667
 let box    = width / 5
@@ -14,7 +14,7 @@ let pic_height = height - (pic_top + bottom)
 
 console.log('client ************')
 
-c1.add(cube.Module('layout').template(function() {
+c1.add(__.Module('layout').template(function() {
   cube.Head(this,
     html.META(this, { name: 'viewport', content: 'width=device-width initial-scale=1.0, user-scalable=no'}),
     html.TITLE(this, Settings.title))
@@ -28,7 +28,7 @@ c1.add(cube.Module('layout').template(function() {
   style$('.bar-subfooter').set({ bottom: 48, height: 62 }) }
 ).close())
 
-c1.add(cube.Module('tabs').template(function() {
+c1.add(__.Module('tabs').template(function() {
   return ionic.Tabs(this, {
     _tabs: '*-icon-top'
   }, blaze.Each(this, 'tabs', (function(_this) {
@@ -48,14 +48,14 @@ c1.add(cube.Module('tabs').template(function() {
 }).close());
 
 
-c1.add(cube.Module('profile').properties(function() {
+c1.add(__.Module('profile').properties(function() {
   return {
     icon: 'person',
     path: 'profile'
   };
 }).template(function() {
   var v, _, _ref;
-  return cube.Template((_ref = cube.View(this), v = _ref[0], _ = _ref[1], _ref), v.title('Profiles'), v.ionListContent('', v.Each('items', (function(_this) {
+  return __.Template((_ref = __.View(this), v = _ref[0], _ = _ref[1], _ref), v.title('Profiles'), v.ionListContent('', v.Each('items', (function(_this) {
     return function() {
       return ionic.Item(_this, {
         buttonRight: true
@@ -130,14 +130,14 @@ c1.add(cube.Module('profile').properties(function() {
   };
 }).close('profile'));
 
-c1.add(cube.Module('settings').properties(function() {
+c1.add(__.Module('settings').properties(function() {
   return {
     icon: 'gear-a',
     path: 'settings'
   };
 }).template(function() {
   var v, _, _ref;
-  return cube.Template((_ref = cube.View(this), v = _ref[0], _ = _ref[1], _ref), v.title(_.property.label), v.ionListContent('', v.ionDivider('General'), v.ionItemLabelToggle('Online', {
+  return __.Template((_ref = __.View(this), v = _ref[0], _ = _ref[1], _ref), v.title(_.property.label), v.ionListContent('', v.ionDivider('General'), v.ionItemLabelToggle('Online', {
     id: 'online'
   }), v.ionDivider('Search'), v.ionItemLabelRange('Distance', {
     name: 'distance',
@@ -254,19 +254,19 @@ c1.add(cube.Module('settings').properties(function() {
 
 console.log('v ok') // remove
 
-c1.add(cube.Module('facebook').template(function() {
+c1.add(__.Module('facebook').template(function() {
   return '';
 }).close());
 
-c1.add(cube.Module('abc').template(function() {
+c1.add(__.Module('abc').template(function() {
   return html.P(this, 'ABC');
 }).close());
 
-c1.add(cube.Module('def').template(function() {
+c1.add(__.Module('def').template(function() {
   return html.P(this, 'DEF');
 }).close());
 
-c1.add(cube.Module('chat').properties(function() {
+c1.add(__.Module('chat').properties(function() {
   return {
     icon: 'chatbubbles',
     path: 'chat',
@@ -307,7 +307,7 @@ c1.add(cube.Module('chat').properties(function() {
 }).helpers(function() {
   return {
     chats: function() {
-      return db.Chats.find({});
+      return __._db.Chats.find({});
     },
     side: function() {
       return 'me';
@@ -327,7 +327,7 @@ c1.add(cube.Module('chat').properties(function() {
   };
 }).close('chat'));
 
-c1.add(cube.Module('chosen').template(function() {
+c1.add(__.Module('chosen').template(function() {
   return html.DIV(this, {
     "class": 'chosen'
   }, blaze.Each(this, 'chosen', (function(_this) {
@@ -437,7 +437,7 @@ c1.add(cube.Module('chosen').template(function() {
     };
   })(this);
 
-  return c1.add(cube.Module('spark').properties(function() {
+  return c1.add(__.Module('spark').properties(function() {
     return {
       path: '/',
       icon: 'flash'
@@ -524,7 +524,7 @@ c1.add(cube.Module('chosen').template(function() {
       return console.log('resolve err', e);
     });
   };
-  return c1.add(cube.Module('camera').properties(function() {
+  return c1.add(__.Module('camera').properties(function() {
     return {
       icon: 'camera',
       path: 'camera'
@@ -550,7 +550,7 @@ c1.add(cube.Module('chosen').template(function() {
   }).close('camera'));
 })();
 
-c1.add(cube.Parts(function() {
+c1.add(__.Parts(function() {
   return {
     title: function(_, v) {
       return blaze.Include(_, 'contentFor', {
