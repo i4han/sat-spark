@@ -12,8 +12,6 @@ let swipe  = 22
 let pic_top    = top + box
 let pic_height = height - (pic_top + bottom)
 
-console.log('client ************')
-
 c1.add(__.Module('layout').template(function() {
   cube.Head(this,
     html.META(this, { name: 'viewport', content: 'width=device-width initial-scale=1.0, user-scalable=no'}),
