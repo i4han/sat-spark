@@ -9,11 +9,9 @@ ionTags.forEach(tag =>
     return __.isUndefined(o)  ? cube.include(     _, iTag) :
       __.isArray(o)           ? cube.includeBlock(_, iTag, () => o) :
       __.isBlazeElement(o)    ? cube.includeBlock(_, iTag, () => [o].concat(args)) :
-      __.isUndefined(args[0]) ? cube.includeAttr (_, iTag, o) : cube.includeAttrBlock(_, iTag, o, () => args)
-})
+      __.isUndefined(args[0]) ? cube.includeAttr (_, iTag, o) : cube.includeAttrBlock(_, iTag, o, () => args) })
 
-exports = __.Cube().add(__.Parts( function() {
-  return {
+__.Parts(() => ({
     ionLabel:  (...args) => html.DIV.apply(null, args),
     ionToggle: (_, attr) =>
       html.LABEL  (_, { class: 'toggle', style: 'position:absolute; top:12px; right: 16px;' },
@@ -33,5 +31,4 @@ exports = __.Cube().add(__.Parts( function() {
     ionItemLabelList:   (_, label, ...args)    => ionic.Item(_, Sat.part.ionLabel(_, label), args),
     ionSubfooterButton: (_, attr, label) => ionic.SubfooterBar(_, html.BUTTON(_, { $btnBlock: attr.id }, label)),
     Each: (_, lookup, func)         => Blaze.Each(( () => cube.lookup(_, lookup)), func),
-    If:   (_, lookup, _then, _else) => Blaze.If  (( () => cube.lookup(_, lookup)), _then, _else)
-  } }))
+    If:   (_, lookup, _then, _else) => Blaze.If  (( () => cube.lookup(_, lookup)), _then, _else) }))

@@ -10,7 +10,7 @@ let swipe  = 22
 let pic_top    = top + box
 let pic_height = height - (pic_top + bottom)
 
-c1.add(__.Module('layout').template(function() {
+__.Module('layout').template(function() {
   cube.Head(this,
     html.META(this, { name: 'viewport', content: 'width=device-width initial-scale=1.0, user-scalable=no'}),
     html.TITLE(this, Settings.title))
@@ -22,9 +22,9 @@ c1.add(__.Module('layout').template(function() {
 //  FB.init({ appId: Sat.setting.public.fbAppId, xfbml: false, version: 'v2.3', status: true })
   FB.init({ appId: Settings.fbAppId, xfbml: false, version: 'v2.3', status: true })
   style$('.bar-subfooter').set({ bottom: 48, height: 62 }) }
-).close())
+).close()
 
-c1.add(__.Module('tabs').template(function() {
+__.Module('tabs').template(function() {
   return ionic.Tabs(this, {
     _tabs: '*-icon-top'
   }, blaze.Each(this, 'tabs', (function(_this) {
@@ -41,10 +41,9 @@ c1.add(__.Module('tabs').template(function() {
       });
     }
   };
-}).close());
+}).close()
 
-
-c1.add(__.Module('profile').properties(function() {
+__.Module('profile').properties(function() {
   return {
     icon: 'person',
     path: 'profile'
@@ -124,9 +123,9 @@ c1.add(__.Module('profile').properties(function() {
       });
     }
   };
-}).close('profile'));
+}).close('profile')
 
-c1.add(__.Module('settings').properties(function() {
+__.Module('settings').properties(function() {
   return {
     icon: 'gear-a',
     path: 'settings'
@@ -246,23 +245,15 @@ c1.add(__.Module('settings').properties(function() {
       left: -width
     });
   }
-}).close('settings'));
+}).close('settings')
 
-console.log('v ok') // remove
-
-c1.add(__.Module('facebook').template(function() {
-  return '';
-}).close());
-
-c1.add(__.Module('abc').template(function() {
-  return html.P(this, 'ABC');
-}).close());
-
-c1.add(__.Module('def').template(function() {
+__.Module('facebook').template(() => '').close()
+__.Module('abc').template(() => html.P(this, 'ABC')).close()
+__.Module('def').template(function() {
   return html.P(this, 'DEF');
-}).close());
+}).close()
 
-c1.add(__.Module('chat').properties(function() {
+__.Module('chat').properties(function() {
   return {
     icon: 'chatbubbles',
     path: 'chat',
@@ -321,9 +312,9 @@ c1.add(__.Module('chat').properties(function() {
       };
     })(this)
   };
-}).close('chat'));
+}).close('chat')
 
-c1.add(__.Module('chosen').template(function() {
+__.Module('chosen').template(function() {
   return html.DIV(this, {
     "class": 'chosen'
   }, blaze.Each(this, 'chosen', (function(_this) {
@@ -362,9 +353,9 @@ c1.add(__.Module('chosen').template(function() {
       };
     })
   };
-}).close());
+}).close()
 
-(function() {
+;(function() {
   var choose, icon_index, index, next, pass, push, setImage, touchEnd, touchStart;
   icon_index = 0;
   index = 0;
@@ -433,7 +424,7 @@ c1.add(__.Module('chosen').template(function() {
     };
   })(this);
 
-  return c1.add(__.Module('spark').properties(function() {
+  return __.Module('spark').properties(function() {
     return {
       path: '/',
       icon: 'flash'
@@ -487,10 +478,10 @@ c1.add(__.Module('chosen').template(function() {
         $photoCard: ''
       }
     };
-  }).close('spark'));
-})();
+  }).close('spark')
+})()
 
-(function() {
+;(function() {
   var upload, uploadPhoto;
   uploadPhoto = function(uri) {
     var ft, o, options;
@@ -520,7 +511,7 @@ c1.add(__.Module('chosen').template(function() {
       return console.log('resolve err', e);
     });
   };
-  return c1.add(__.Module('camera').properties(function() {
+  return __.Module('camera').properties(function() {
     return {
       icon: 'camera',
       path: 'camera'
@@ -543,10 +534,10 @@ c1.add(__.Module('chosen').template(function() {
       encodingType: Camera.EncodingType.JPEG,
       sourceType: Camera.PictureSourceType.CAMERA
     });
-  }).close('camera'));
-})();
+  }).close('camera')
+})()
 
-c1.add(__.Parts(function() {
+__.Parts(function() {
   return {
     title: function(_, v) {
       return blaze.Include(_, 'contentFor', {
@@ -607,6 +598,6 @@ c1.add(__.Parts(function() {
       };
     }
   };
-}));
+})
 
 // typeof Meteor === "undefined" && (module.exports = c1)

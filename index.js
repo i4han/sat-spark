@@ -1,5 +1,5 @@
 
-exports = __.Cube().add(
+module.exports = __.Cube().add(
 
   __.Module('chat').methods(() => ({
       says: (id, text) =>
