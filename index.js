@@ -71,14 +71,14 @@ module.exports = __.Cube().add(
       this.response.end("ok") }) }
   ).close(),
 
-  __.Settings(() => {
+  __.Settings(o => {
     const local_ip = '192.168.1.65'
     const deploy_domain = 'spark5.meteor.com'
     return {
       app: {
         info: {
           id: 'com.spark.game',
-          name: () => this.title,
+          name: () => o.title,
           description: 'Spark game long name.',
           website: 'http://sparkgame.com' },
         icons: {
@@ -107,7 +107,7 @@ module.exports = __.Cube().add(
         busboy: "0.2.9",
         cloudinary: "1.2.1" },
       public: {
-        title: () => this.title,
+        title: () => o.title,
         //fbAppId: () => process.env.FACEBOOK_CLIENT_ID,
         collections: {},
         image_url: "http://res.cloudinary.com/sparks/image/upload/",
@@ -125,7 +125,7 @@ module.exports = __.Cube().add(
               client_id: process.env.FACEBOOK_CLIENT_ID,
               redirect_uri: 'http://localhost:3000/home' } },
           secret: process.env.FACEBOOK_SECRET,
-          client_id: process.env.FACEBOOK_CLIENT_ID } } } }),
+          client_id: process.env.FACEBOOK_CLIENT_ID } } } } ),
 
   __.Module('chart').collections(() => ({
     Ticker:     {publish: () => __._db.Ticker.find()},
