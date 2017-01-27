@@ -143,7 +143,6 @@ __.isMeteorServer(() => __.meteorStartup(() => {
       socket.on('ticker',     data => __.db('Ticker',     data, (c, d) => Fiber(() => c.insert(d)).run()))
       socket.on('trade',      data => __.db('Trade',      data, (c, d) => Fiber(() => c.insert(d)).run()))
       socket.on('grouporder', data => __.db('GroupOrder', data, (c, d) => Fiber(() => c.insert(d)).run())) })
-  */
 
       console.log('Start!')
       const WebSocket = require('ws')
@@ -155,6 +154,5 @@ __.isMeteorServer(() => __.meteorStartup(() => {
       ws.on('message', (data, flags) => console.log(data))
       //socket.emit('subscribe', 'marketdata_cnybtc')
       //socket.on('grouporder', data => __.db('GroupOrder', data, (c, d) => Fiber(() => c.insert(d)).run()))
-
-
+      */
 }) )
