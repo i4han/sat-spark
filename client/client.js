@@ -10,6 +10,8 @@ let swipe  = 22
 let pic_top    = top + box
 let pic_height = height - (pic_top + bottom)
 
+let m = require('moment')
+console.log(m().format())
 __.Module('layout').template(function() {
   cube.Head(this,
     html.META(this, { name: 'viewport', content: 'width=device-width initial-scale=1.0, user-scalable=no'}),
@@ -19,7 +21,6 @@ __.Module('layout').template(function() {
     ionic.NavView(this, blaze.Include(this, 'yield')),
     blaze.Include(this, 'tabs'))
 }).onStartup(() => {
-//  FB.init({ appId: Sat.setting.public.fbAppId, xfbml: false, version: 'v2.3', status: true })
   FB.init({ appId: Settings.fbAppId, xfbml: false, version: 'v2.3', status: true })
   style$('.bar-subfooter').set({ bottom: 48, height: 62 }) }
 ).close()
@@ -599,5 +600,3 @@ __.Parts(function() {
     }
   };
 })
-
-// typeof Meteor === "undefined" && (module.exports = c1)
