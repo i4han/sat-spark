@@ -19,7 +19,8 @@
     "url": "https://github.com/i4han/sat-spark/issues"
   },
   "homepage": "https://github.com/i4han/sat-spark#readme",
-  "__manually installed": "meteor npm install --save accepts base64id cookie engine.io mime-db mime-types negotiator object-assign socket.io-adapter",
+  "__meteor_forced_install": "meteor npm install --save accepts base64id cookie engine.io mime-db mime-types negotiator object-assign socket.io-adapter",
+  "__user_install": "babel-runtime fibers meteor-node-stubs socket.ioclient",
   "dependencies": {
     "accepts": "^1.3.3",
     "babel-runtime": "^6.22.0",

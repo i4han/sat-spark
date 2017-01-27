@@ -133,12 +133,28 @@ module.exports = __.Cube().add(
     GroupOrder: {publish: () => __._db.GroupOrder.find()} }))
 )
 
-false && __.isMeteorServer(() => __.meteorStartup(() => {
-  const socket = require('socket.io-client')('https://websocket.btcchina.com/')
-  const Fiber  = require('fibers')
-  socket.emit('subscribe', 'marketdata_cnybtc')
-  socket.emit('subscribe', 'grouporder_cnybtc')
-  socket.on('ticker',     data => __.db('Ticker',     data, (c, d) => Fiber(() => c.insert(d)).run()))
-  socket.on('trade',      data => __.db('Trade',      data, (c, d) => Fiber(() => c.insert(d)).run()))
-  socket.on('grouporder', data => __.db('GroupOrder', data, (c, d) => Fiber(() => c.insert(d)).run()))
+__.isMeteorServer(() => __.meteorStartup(() => {
+  /*
+  0 && (() => {
+      const socket = require('socket.io-client')('https://websocket.btcchina.com/')
+      const Fiber  = require('fibers')
+      socket.emit('subscribe', 'marketdata_cnybtc')
+      socket.emit('subscribe', 'grouporder_cnybtc')
+      socket.on('ticker',     data => __.db('Ticker',     data, (c, d) => Fiber(() => c.insert(d)).run()))
+      socket.on('trade',      data => __.db('Trade',      data, (c, d) => Fiber(() => c.insert(d)).run()))
+      socket.on('grouporder', data => __.db('GroupOrder', data, (c, d) => Fiber(() => c.insert(d)).run())) })
+  */
+
+      console.log('Start!')
+      const WebSocket = require('ws')
+      const ws = new WebSocket("wss://real.okcoin.com:10440/websocket/okcoinapi")
+      console.log(ws)
+      ws.on('open', () => {
+        console.log('CONNECTED!')
+        ws.send("{'event':'addChannel','channel':'ok_sub_spotusd_btc_ticker'}") })
+      ws.on('message', (data, flags) => console.log(data))
+      //socket.emit('subscribe', 'marketdata_cnybtc')
+      //socket.on('grouporder', data => __.db('GroupOrder', data, (c, d) => Fiber(() => c.insert(d)).run()))
+
+
 }) )
