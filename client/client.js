@@ -1,6 +1,5 @@
 'use strict'
 
-let c1     = __.Cube()
 let width  = 375
 let height = 667
 let box    = width / 5
@@ -9,9 +8,8 @@ let bottom = 44
 let swipe  = 22
 let pic_top    = top + box
 let pic_height = height - (pic_top + bottom)
+let v, m
 
-let m = require('moment')
-console.log(m().format())
 __.Module('layout').template(function() {
   cube.Head(this,
     html.META(this, { name: 'viewport', content: 'width=device-width initial-scale=1.0, user-scalable=no'}),
@@ -25,71 +23,39 @@ __.Module('layout').template(function() {
   style$('.bar-subfooter').set({ bottom: 48, height: 62 }) }
 ).close()
 
-__.Module('tabs').template(function() {
-  return ionic.Tabs(this, {
-    _tabs: '*-icon-top'
-  }, blaze.Each(this, 'tabs', (function(_this) {
-    return function() {
-      return ionic.Tab(_this, { title: '{label}', path: '{name}', iconOff: '{icon}', iconOn: '{icon}'
-      });
-    };
-  })(this)));
-}).helpers(function() {
-  return {
-    tabs: function() {
-      return 'chat camera spark settings profile'.split(' ').map(function(a) {
-        return Sat.module[a].property;
-      });
-    }
-  };
+__.Module('web').template(function() {
+    cube.Head(this,
+      html.TITLE(this, Settings.title))
+    return blaze.Include(this, 'yield')
 }).close()
 
-__.Module('profile').properties(function() {
-  return {
+__.Module('tabs').template(function() {
+  return ionic.Tabs(this, { _tabs: '*-icon-top'},
+    blaze.Each(this, 'tabs', () =>
+      ionic.Tab(this, { title: '{label}', path: '{name}', iconOff: '{icon}', iconOn: '{icon}' }) ))
+}).helpers(() => ({
+    tabs: () => 'chat camera spark settings profile'.split(' ').map(a => Sat.module[a].property) })
+).close()
+
+__.Module('profile').properties({
     icon: 'person',
     path: 'profile'
-  };
 }).template(function() {
-  var v, _, _ref;
-  return __.Template((_ref = __.View(this), v = _ref[0], _ = _ref[1], _ref), v.title('Profiles'), v.ionListContent('', v.Each('items', (function(_this) {
-    return function() {
-      return ionic.Item(_this, {
-        buttonRight: true
-      }, html.H2(_this, 'title {title} content &#123; &#125; {content} works!'), html.P(_this, cube.lookupInView(_this, 'content')), html.BUTTON(_this, {
-        _button: '* *-positive'
-      }, ionic.Icon(_this, {
-        icon: 'ios-telephone'
-      })));
-    };
-  })(this))), v.ionSubfooterButton({
-    id: 'facebook'
-  }, 'login with facebook'));
-}).helpers(function() {
-  return {
-    items: function() {
-      return [
-        {
-          title: 'hello6',
-          content: 'world6'
-        }, {
-          title: 'hello1',
-          content: 'world1'
-        }, {
-          title: 'hello2',
-          content: 'world2'
-        }, {
-          title: 'hello3',
-          content: 'world3'
-        }
-      ];
-    },
-    token: function() {
-      return facebookConnectPlugin.getAccessToken((function(token) {
-        return Session.set('fbToken', token);
-      }), (function() {}));
-    }
-  };
-}).events(function() {
+  return __.Template(([v, m] = __.View(this)),
+        v.title('Profiles'), v.ionListContent('', v.Each('items', () =>
+           ionic.Item(this, { buttonRight: true },
+              html.H2(this, 'title {title} content &#123; &#125; {content} works!'),
+                html.P(this, cube.lookupInView(this, 'content')), html.BUTTON(this, { _button: '* *-positive' },
+                    ionic.Icon(this, { icon: 'ios-telephone' })))
+        )), v.ionSubfooterButton({ id: 'facebook' }, 'login with facebook'))
+}).helpers(() => ({
+    items: () => [
+        { title: 'hello6', content: 'world6' },
+        { title: 'hello1', content: 'world1' },
+        { title: 'hello2', content: 'world2' },
+        { title: 'hello3', content: 'world3' } ],
+    token: () => facebookConnectPlugin.getAccessToken((token => Session.set('fbToken', token)), function() {})
+})).events(function() {
   return {
     'touchend #facebook': function() {
       return facebookConnectPlugin.login(['publish_actions'], (function() {
@@ -126,70 +92,40 @@ __.Module('profile').properties(function() {
   };
 }).close('profile')
 
-__.Module('settings').properties(function() {
-  return {
+__.Module('settings').properties({
     icon: 'gear-a',
     path: 'settings'
-  };
 }).template(function() {
-  var v, _, _ref;
-  return __.Template((_ref = __.View(this), v = _ref[0], _ = _ref[1], _ref), v.title(_.property.label), v.ionListContent('', v.ionDivider('General'), v.ionItemLabelToggle('Online', {
-    id: 'online'
-  }), v.ionDivider('Search'), v.ionItemLabelRange('Distance', {
-    name: 'distance',
-    min: '0',
-    max: '200',
-    value: '33'
-  }, '0', '80 km'), v.ionItemLabelList('Age', v.ionRange({
-    name: 'age',
-    local: 'agefrom',
-    min: '18',
-    max: '80',
-    value: '25'
-  }, '18', '80'), v.ionRange({
-    name: 'age',
-    local: 'ageto',
-    min: '18',
-    max: '80',
-    value: '25'
-  }, '18', '80')), v.ionItemLabelSelect('Language', {
-    id: 'language'
-  }, 'Korean', ['English', 'Spanish', 'Chinese', 'Korean', 'Japanese']), v.ionItemLabelSelect('Search for', {
-    id: 'preference'
-  }, 'woman', ['woman', 'man', 'both']), v.ionDivider('Notification'), v.ionItemLabelToggle('New matches', {
-    id: 'new-matches'
-  }), v.ionItemLabelToggle('Messages', {
-    id: 'message'
-  })), v.ionSubfooterButton({
-    id: 'logout'
-  }, 'logout'));
-}).styles(function() {
-  return {
+  return __.Template([v, m] = __.View(this),
+    v.title(m.property.label),
+    v.ionListContent('', v.ionDivider('General'),
+        v.ionItemLabelToggle('Online', { id: 'online' }),
+        v.ionDivider('Search'),
+        v.ionItemLabelRange('Distance', { name: 'distance', min: '0', max: '200', value: '33' }, '0', '80 km'),
+        v.ionItemLabelList('Age', v.ionRange({ name: 'age', local: 'agefrom', min: '18', max: '80', value: '25' }, '18', '80'),
+        v.ionRange({ name: 'age', local: 'ageto', min: '18', max: '80', value: '25' }, '18', '80')),
+        v.ionItemLabelSelect('Language', { id: 'language' }, 'Korean', ['English', 'Spanish', 'Chinese', 'Korean', 'Japanese']),
+        v.ionItemLabelSelect('Search for', { id: 'preference' }, 'woman', ['woman', 'man', 'both']),
+        v.ionDivider('Notification'),
+        v.ionItemLabelToggle('New matches', { id: 'new-matches' }),
+        v.ionItemLabelToggle('Messages', { id: 'message' })),
+        v.ionSubfooterButton({ id: 'logout' }, 'logout') )
+}).styles({
     'local_agefrom::-webkit-slider-thumb::after': {
       backgroundColor: '#387ef5',
       left: 28,
       width: 1000,
       top: 13,
       padding: 0,
-      height: 2
-    },
+      height: 2 },
     'local_agefrom::-webkit-slider-thumb::before': {
-      height: 0
-    },
+      height: 0 },
     'local_ageto::-webkit-slider-thumb::before': {
-      height: 2.001
-    }
-  };
-}).helpers(function() {
-  return {
-    go: function() {
-      return Session.get('go');
-    },
-    login: function() {
-      return Session.get('loginStatus');
-    }
-  };
-}).events(function() {
+      height: 2.001 }
+}).helpers(() => ({
+    go:    () => Session.get('go'),
+    login: () => Session.get('loginStatus') })
+).events(function() {
   return {
     'touchend #logout': function() {
       return facebookConnectPlugin.logout((function() {
@@ -205,82 +141,52 @@ __.Module('settings').properties(function() {
     })(this)
   };
 }).onCreated(function() {
-  var _;
-  _ = __.module(this);
-  _.style$ageFrom = style$(_.local('#agefrom') + '::-webkit-slider-thumb::after');
-  return _.style$ageTo = style$(_.local('#ageto') + '::-webkit-slider-thumb::before');
+  m = __.module(this)
+  m.style$ageFrom = style$(m.local('#agefrom') + '::-webkit-slider-thumb::after')
+  return m.style$ageTo = style$(m.local('#ageto') + '::-webkit-slider-thumb::before')
 }).onRendered(function() {
-  var _;
-  _ = __.module(this);
+  m = __.module(this);
   this.$('#online').prop('checked', true);
-  this.$to = this.$to || _.$('#ageto');
-  this.$from = this.$from || _.$('#agefrom');
-  _.unit = (_.$('#agefrom').width() - 28) / (80 - 18);
-  this.$from.on('input', (function(_this) {
-    return function(evt) {
-      var to, val;
-      if ((val = evt.target.value) > (to = _this.$to.val())) {
-        return _this.$to.val(val);
+  this.$to = this.$to || m.$('#ageto');
+  this.$from = this.$from || m.$('#agefrom');
+  m.unit = (m.$('#agefrom').width() - 28) / (80 - 18);
+  this.$from.on('input', evt => {
+      var to, val
+      if ((val = evt.target.value) > (to = this.$to.val())) {
+        this.$to.val(val)
       } else {
-        return _.rangeSync(val, to);
-      }
-    };
-  })(this));
-  return this.$to.on('input', (function(_this) {
-    return function(evt) {
-      var from, val;
-      if ((val = evt.target.value) < (from = _this.$from.val())) {
-        return _this.$from.val(val);
+        m.rangeSync(val, to) } })
+  this.$to.on('input', evt => {
+      var from, val
+      if ((val = evt.target.value) < (from = this.$from.val())) {
+        this.$from.val(val);
       } else {
-        return _.rangeSync(from, val);
-      }
-    };
-  })(this));
+        m.rangeSync(from, val); } })
 }).fn({
   rangeSync: function(from, to) {
-    this.style$ageFrom.set({
-      width: (to - from - 1) * this.unit
-    });
-    return this.style$ageTo.set({
-      width: width = (to - from - 1) * this.unit,
-      left: -width
-    });
-  }
+    this.style$ageFrom.set({ width: (to - from - 1) * this.unit })
+    this.style$ageTo  .set({ width: width = (to - from - 1) * this.unit, left: -width }) }
 }).close('settings')
 
 __.Module('facebook').template(() => '').close()
-__.Module('abc').template(() => html.P(this, 'ABC')).close()
+__.Module('abc').properties({path:'abc', layout:'web'}).template(() => html.P(this, 'ABC')).close()
 __.Module('def').template(function() {
   return html.P(this, 'DEF');
 }).close()
 
-__.Module('chat').properties(function() {
-  return {
+__.Module('chat').properties({
     icon: 'chatbubbles',
     path: 'chat',
     hash: '0fc7da9b30f3e2c7'
-  };
 }).template(function() {
   return [
-    part.title(this, 'Chat'), html.DIV(this, {
-      "class": 'content'
-    }, html.DIV(this, {
-      "class": 'content-padded',
-      local: 'chat'
-    }, blaze.Each(this, 'chats', (function(_this) {
-      return function() {
-        return html.DIV(_this, {
-          id: '{id}',
-          _chat: '* *-{side}'
-        }, '{text}');
-      };
-    })(this)))), ionic.SubfooterBar(this, html.INPUT(this, {
-      local: 'input0',
-      type: 'text'
-    }))
-  ];
-}).styles(function() {
-  return {
+    part.title(this, 'Chat'),
+    html.DIV(this, { "class": 'content' },
+        html.DIV(this, { "class": 'content-padded', local: 'chat' },
+            blaze.Each(this, 'chats', () =>
+                html.DIV(this, { id: '{id}', _chat: '* *-{side}' }, '{text}') ))),
+    ionic.SubfooterBar(this, html.INPUT(this, { local: 'input0', type: 'text' })) ]
+}).styles({
     _chat:      { display:    'block' },
     _chatMe:    { color:      'black' },
     _chatYou:   { marginLeft: 20      },
@@ -291,15 +197,10 @@ __.Module('chat').properties(function() {
       $mp: 0,
       border: 0
     }
-  };
 }).helpers(function() {
   return {
-    chats: function() {
-      return __._db.Chats.find({});
-    },
-    side: function() {
-      return 'me';
-    }
+    chats: () => __._db.Chats.find({}),
+    side: () => 'me'
   };
 }).events(function() {
   return {
@@ -330,29 +231,21 @@ __.Module('chosen').template(function() {
       }), console.log(cube.lookup(_this, 'id')));
     };
   })(this)));
-}).styles(function() {
-  return {
+}).styles({
     _chosen: {
       display: 'flex',
       flexDirection: 'row',
-      $box: ['100%', box]
-    },
+      $box: ['100%', box] },
     _chosenContainer: {
       flexGrow: 1,
       float: 'left',
       $box: [box, box],
       zIndex: 200,
       border: 3,
-      overflowY: 'hidden'
-    }
-  };
+      overflowY: 'hidden' }
 }).helpers(function() {
   return {
-    chosen: [0, 1, 2, 3, 4].map(function(i) {
-      return {
-        id: i
-      };
-    })
+    chosen: [0, 1, 2, 3, 4].map(i => ({ id: i }))
   };
 }).close()
 
@@ -425,11 +318,9 @@ __.Module('chosen').template(function() {
     };
   })(this);
 
-  return __.Module('spark').properties(function() {
-    return {
+  __.Module('spark').properties({
       path: '/',
       icon: 'flash'
-    };
   }).template(function() {
     console.log('PART', part);
     return [
@@ -447,38 +338,31 @@ __.Module('chosen').template(function() {
     return $('#photo-' + (index = Session.get('index'))).draggable({
       axis: 'y'
     }).on('touchstart', touchStart).on('touchend', touchEnd);
-  }).onDestroyed(function() {
-    Session.set('index', index);
-    Session.set('photo-front', $('.photo-front').attr('src'));
-    return Session.set('photo-back', $('.photo-back').attr('src'));
-  }).styles(function() {
-    return {
+}).onDestroyed(() => {
+    Session.set('index', index)
+    Session.set('photo-front', $('.photo-front').attr('src'))
+    Session.set('photo-back', $('.photo-back').attr('src'))
+  }).styles({
       _photo: {
         width: width,
         background: 'white',
-        overflow: 'hidden'
-      },
+        overflow: 'hidden' },
       _photoIcon: {
         zIndex: 20,
         width: box,
         top: top,
-        clip: 'rect(0px, 75px, 75px, 0px)'
-      },
+        clip: 'rect(0px, 75px, 75px, 0px)' },
       _photoFront: {
         zIndex: 10,
-        position: 'absolute'
-      },
+        position: 'absolute' },
       _photoBack: {
         zIndex: -10,
-        position: 'absolute'
-      },
+        position: 'absolute' },
       _photoTouched: {
         zIndex: 1000,
         position: 'absolute',
         width: width - 1,
-        $photoCard: ''
-      }
-    };
+        $photoCard: '' }
   }).close('spark')
 })()
 
@@ -512,11 +396,9 @@ __.Module('chosen').template(function() {
       return console.log('resolve err', e);
     });
   };
-  return __.Module('camera').properties(function() {
-    return {
+  return __.Module('camera').properties({
       icon: 'camera',
       path: 'camera'
-    };
   }).template(function() {
     return [
       part.title(this, 'Camera'), html.IMG(this, {
@@ -538,65 +420,17 @@ __.Module('chosen').template(function() {
   }).close('camera')
 })()
 
-__.Parts(function() {
-  return {
-    title: function(_, v) {
-      return blaze.Include(_, 'contentFor', {
-        headerTitle: ''
-      }, html.H1(_, {
-        "class": 'title'
-      }, v));
-    },
-    $btnBlock: function(v) {
-      return {
-        _button: '* *-block',
-        id: v
-      };
-    },
-    $mp: function(v) {
-      return {
-        margin: v,
-        padding: v
-      };
-    },
-    $tabItem: function(v) {
-      return {
-        "class": 'tab-item',
-        href: v,
-        dataIgnore: 'push'
-      };
-    },
-    $box: function(a) {
-      return {
-        width: a[0],
-        height: a[1]
-      };
-    },
-    $subfooter: function(v) {
-      return {
-        _bar: '* *-standard *-footer-secondary',
-        _: v
-      };
-    },
-    $fixedTop: function(v) {
-      return {
-        position: 'fixed',
-        top: v
-      };
-    },
-    $fixedBottom: function(v) {
-      return {
-        position: 'fixed',
-        bottom: v
-      };
-    },
-    $photoCard: function(v) {
-      return {
+__.Parts({
+    title:   (_, v) => blaze.Include(_, 'contentFor', {headerTitle: ''}, html.H1(_, {class: 'title'}, v)),
+    $btnBlock:    v => ({ _button: '* *-block', id: v }),
+    $mp:          v => ({ margin: v, padding: v }),
+    $tabItem:     v => ({ class: 'tab-item', href: v, dataIgnore: 'push' }),
+    $box:         a => ({ width: a[0], height: a[1] }),
+    $subfooter:   v => ({ _bar: '* *-standard *-footer-secondary', _: v }),
+    $fixedTop:    v => ({ position: 'fixed', top: v }),
+    $fixedBottom: v => ({ position: 'fixed', bottom: v }),
+    $photoCard:   v => ({
         background: 'white',
         borderRadius: 2,
         padding: v || '8px 6px',
-        boxShadow: '1px 1px 5px 1px'
-      };
-    }
-  };
-})
+        boxShadow: '1px 1px 5px 1px' }) })
