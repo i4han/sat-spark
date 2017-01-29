@@ -2,3 +2,4 @@
 .settings.json
 mobile-config.js
 node_modules/*
+packages/*
