@@ -21,13 +21,8 @@ __.Module('layout').template(function() {
 }).onStartup(() => {
   FB.init({ appId: Settings.fbAppId, xfbml: false, version: 'v2.3', status: true })
   style$('.bar-subfooter').set({ bottom: 48, height: 62 }) }
-).close()
+).build()
 
-__.Module('web').template(function() {
-    cube.Head(this,
-      html.TITLE(this, Settings.title))
-    return blaze.Include(this, 'yield')
-}).close()
 
 __.Module('tabs').template(function() {
   return ionic.Tabs(this, { _tabs: '*-icon-top'},
@@ -35,7 +30,7 @@ __.Module('tabs').template(function() {
       ionic.Tab(this, { title: '{label}', path: '{name}', iconOff: '{icon}', iconOn: '{icon}' }) ))
 }).helpers(() => ({
     tabs: () => 'chat camera spark settings profile'.split(' ').map(a => Sat.module[a].property) })
-).close()
+).build()
 
 __.Module('profile').properties({
     icon: 'person',
@@ -90,7 +85,7 @@ __.Module('profile').properties({
       });
     }
   };
-}).close('profile')
+}).build('profile')
 
 __.Module('settings').properties({
     icon: 'gear-a',
@@ -166,13 +161,12 @@ __.Module('settings').properties({
   rangeSync: function(from, to) {
     this.style$ageFrom.set({ width: (to - from - 1) * this.unit })
     this.style$ageTo  .set({ width: width = (to - from - 1) * this.unit, left: -width }) }
-}).close('settings')
+}).build('settings')
 
-__.Module('facebook').template(() => '').close()
-__.Module('abc').properties({path:'abc', layout:'web'}).template(() => html.P(this, 'ABC')).close()
+__.Module('facebook').template(() => '').build()
 __.Module('def').template(function() {
   return html.P(this, 'DEF');
-}).close()
+}).build()
 
 __.Module('chat').properties({
     icon: 'chatbubbles',
@@ -214,7 +208,7 @@ __.Module('chat').properties({
       };
     })(this)
   };
-}).close('chat')
+}).build('chat')
 
 __.Module('chosen').template(function() {
   return html.DIV(this, {
@@ -247,7 +241,7 @@ __.Module('chosen').template(function() {
   return {
     chosen: [0, 1, 2, 3, 4].map(i => ({ id: i }))
   };
-}).close()
+}).build()
 
 ;(function() {
   var choose, icon_index, index, next, pass, push, setImage, touchEnd, touchStart;
@@ -363,7 +357,7 @@ __.Module('chosen').template(function() {
         position: 'absolute',
         width: width - 1,
         $photoCard: '' }
-  }).close('spark')
+  }).build('spark')
 })()
 
 ;(function() {
@@ -417,7 +411,7 @@ __.Module('chosen').template(function() {
       encodingType: Camera.EncodingType.JPEG,
       sourceType: Camera.PictureSourceType.CAMERA
     });
-  }).close('camera')
+  }).build('camera')
 })()
 
 __.Parts({

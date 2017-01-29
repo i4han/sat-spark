@@ -7,7 +7,7 @@ module.exports = __.Cube().add(
           id: id,
           text: text }) })
   ).collections({Chats: {}}
-  ).close(),
+  ).build(),
 
   __.Module('spark').collections(function() { return {
       Users: {
@@ -39,7 +39,7 @@ module.exports = __.Cube().add(
     photoUrl: (i, j) => { // es6 feature j=0 is not yet supported
       if (j == null) {j = 0}
       return Settings.image_url + (this.Matches || Matches)[i].public_ids[j] + '.jpg' } }
-  ).close('spark'),
+  ).build('spark'),
 
   __.Module('camera').onServer(function() {
     const fs = Npm.require('fs')
@@ -69,7 +69,7 @@ module.exports = __.Cube().add(
     Router.route('/upload', {where: 'server'}).post(function() {
       this.response.writeHead(200, {'Content-Type': 'text/plain'})
       this.response.end("ok") }) }
-  ).close(),
+  ).build(),
 
   __.Settings(o => {
     const local_ip = '192.168.1.65'
