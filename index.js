@@ -82,7 +82,7 @@ module.exports = __.Cube().add(
           description: 'Spark game long name.',
           website: 'http://sparkgame.com' },
         icons: {
-          iphone: 'resources/icons/icon-60x60.png',
+          iphone:    'resources/icons/icon-60x60.png',
           iphone_2x: 'resources/icons/icon-60x60@2x.png' },
         setPreference: {
           BackgroundColor: '0xff0000ff',
@@ -90,7 +90,7 @@ module.exports = __.Cube().add(
         configurePlugin: {
           'com.phonegap.plugins.facebookconnect': {
             APP_NAME: 'spark-game-test',
-            APP_ID: process.env.FACEBOOK_CLIENT_ID,
+            APP_ID:  process.env.FACEBOOK_CLIENT_ID,
             API_KEY: process.env.FACEBOOK_SECRET } },
         accessRule: ["http://localhost/*", "http://meteor.local/*", "http://" + local_ip + "/*", "http://connect.facebook.net/*", "http://*.facebook.com/*", "https://*.facebook.com/*", "ws://" + local_ip + "/*", "http://" + deploy_domain + "/*", "ws://" + deploy_domain + "/*", "http://res.cloudinary.com/*", "mongodb://ds031922.mongolab.com/*"] },
       deploy: {
@@ -99,10 +99,10 @@ module.exports = __.Cube().add(
       cubesat: { version: '0.5.0' },
       title: "Spark Game",
       theme: "clean",
-      lib: "ui",
+      lib:   "ui",
       env: {
         production: {
-          MONGO_URL: process.env.MONGO_URL } },
+          MONGO_URL: process.env.MONGO_URL } }, // not working 2017-1-29
       npm: {
         busboy: "0.2.9",
         cloudinary: "1.2.1" },
@@ -114,7 +114,7 @@ module.exports = __.Cube().add(
         upload: "http://" + local_ip + ":3000/upload" },
       cloudinary: {
         cloud_name: "sparks",
-        api_key: process.env.CLOUDINARY_API_KEY,
+        api_key:    process.env.CLOUDINARY_API_KEY,
         api_secret: process.env.CLOUDINARY_API_SECRET },
       facebook: {
         oauth: {
@@ -124,7 +124,7 @@ module.exports = __.Cube().add(
             query: {
               client_id: process.env.FACEBOOK_CLIENT_ID,
               redirect_uri: 'http://localhost:3000/home' } },
-          secret: process.env.FACEBOOK_SECRET,
+          secret:    process.env.FACEBOOK_SECRET,
           client_id: process.env.FACEBOOK_CLIENT_ID } } } } ),
 
   __.Module('chart').collections(() => ({

@@ -1,13 +1,15 @@
 
 let c3 = require('c3')
 
-__.Module('web').head({
+__.Module('web').router({
+    defaultLayout: true
+}).head({
     title: Settings.title
 }).template(function() {
     return blaze.Include(this, 'yield')
-}).build()
+}).build('web')
 
-__.Module('abc').properties({path:'abc', layout:'web'}
+__.Module('graph').properties({path:'graph', layout:'web'}  // router
 ).template(() => html.P(this, __.ID('chart'))
 ).onRendered(() => {
     let chart = c3.generate({
@@ -19,4 +21,4 @@ __.Module('abc').properties({path:'abc', layout:'web'}
             types: {
                 data1: 'area',
                 data2: 'area-spline' } } })
-}).build()
+}).build('graph')
