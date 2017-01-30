@@ -19,7 +19,6 @@ __.Module('layout').template(function() {
     ionic.NavView(this, blaze.Include(this, 'yield')),
     blaze.Include(this, 'tabs'))
 }).onStartup(() => {
-  FB.init({ appId: Settings.fbAppId, xfbml: false, version: 'v2.3', status: true })
   style$('.bar-subfooter').set({ bottom: 48, height: 62 }) }
 ).build()
 
