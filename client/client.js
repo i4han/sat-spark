@@ -10,10 +10,10 @@ let pic_top    = top + box
 let pic_height = height - (pic_top + bottom)
 let v, m
 
-__.Module('layout').template(function() {
-  cube.Head(this,
-    html.META(this, { name: 'viewport', content: 'width=device-width initial-scale=1.0, user-scalable=no'}),
-    html.TITLE(this, Settings.title))
+__.Module('layout').head({
+     meta: { name: 'viewport', content: 'width=device-width initial-scale=1.0, user-scalable=no'},
+     title: Settings.title
+}).template(function() {
   return ionic.Body(this,
     ionic.NavBar(this, { class: 'bar-royal' }),
     ionic.NavView(this, blaze.Include(this, 'yield')),
@@ -27,8 +27,8 @@ __.Module('tabs').template(function() {
   return ionic.Tabs(this, { _tabs: '*-icon-top'},
     blaze.Each(this, 'tabs', () =>
       ionic.Tab(this, { title: '{label}', path: '{name}', iconOff: '{icon}', iconOn: '{icon}' }) ))
-}).helpers(() => ({
-    tabs: () => 'chat camera spark settings profile'.split(' ').map(a => Sat.module[a]._) })
+}).helpers({
+    tabs: () => 'chat camera spark settings profile'.split(' ').map(a => Sat.module[a]._) }
 ).build()
 
 __.Module('profile').properties({
@@ -44,14 +44,14 @@ __.Module('profile').properties({
                 html.P(this, cube.lookupInView(this, 'content')), html.BUTTON(this, { _button: '* *-positive' },
                     ionic.Icon(this, { icon: 'ios-telephone' })))
         )), v.ionSubfooterButton({ id: 'facebook' }, 'login with facebook'))
-}).helpers(() => ({
+}).helpers({
     items: () => [
         { title: 'hello6', content: 'world6' },
         { title: 'hello1', content: 'world1' },
         { title: 'hello2', content: 'world2' },
         { title: 'hello3', content: 'world3' } ],
     token: () => facebookConnectPlugin.getAccessToken((token => Session.set('fbToken', token)), function() {})
-})).events(function() {
+}).events(function() {
   return {
     'touchend #facebook': function() {
       return facebookConnectPlugin.login(['publish_actions'], (function() {
@@ -108,7 +108,7 @@ __.Module('settings').properties({
         v.ionItemLabelToggle('New matches', { id: 'new-matches' }),
         v.ionItemLabelToggle('Messages', { id: 'message' })),
         v.ionSubfooterButton({ id: 'logout' }, 'logout') )
-}).styles({
+}).style({
     'local_agefrom::-webkit-slider-thumb::after': {
       backgroundColor: '#387ef5',
       left: 28,
@@ -185,7 +185,7 @@ __.Module('chat').properties({
             blaze.Each(this, 'chats', () =>
                 html.DIV(this, { id: '{id}', _chat: '* *-{side}' }, '{text}') ))),
     ionic.SubfooterBar(this, html.INPUT(this, { local: 'input0', type: 'text' })) ]
-}).styles({
+}).style({
     _chat:      { display:    'block' },
     _chatMe:    { color:      'black' },
     _chatYou:   { marginLeft: 20      },
@@ -230,7 +230,7 @@ __.Module('chosen').template(function() {
       }), console.log(cube.lookup(_this, 'id')));
     };
   })(this)));
-}).styles({
+}).style({
     _chosen: {
       display: 'flex',
       flexDirection: 'row',
@@ -343,7 +343,7 @@ __.Module('chosen').template(function() {
     Session.set('index', index)
     Session.set('photo-front', $('.photo-front').attr('src'))
     Session.set('photo-back', $('.photo-back').attr('src'))
-  }).styles({
+  }).style({
       _photo: {
         width: width,
         background: 'white',
