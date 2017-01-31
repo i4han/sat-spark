@@ -1,24 +1,31 @@
 
 let c3 = require('c3')
 
+let draw = () => new Promise((resolve, reject) => {
+})
+
+//var data1 = ['data1'].concat(__._db.bcTrades.find({}).map(i => i.price))
+
 __.Module('web').router({
     defaultLayout: true
 }).head({
-    title: Settings.title
+    title: Settings.title,
+    meta: {name:"viewport", content:"width=device-width, initial-scale=1"}
 }).template(function() {
-    return blaze.Include(this, 'yield')
+    return __.CLASS('container-fluid',
+        blaze.Include(this, 'yield'))
 }).build('web')
 
 __.Module('graph').properties({path:'graph', layout:'web'}  // router
-).template(() => html.P(this, __.ID('chart'))
+).template(() => __.ID('graph')
 ).onRendered(() => {
     let chart = c3.generate({
-        bindto: '#chart',
+        bindto: '#graph',
         data: {
             columns: [
-                ['data1', 300, 350, 300, 0, 0, 0],
+                ['data1', 170, 120, 100, 110, 170, 30],
                 ['data2', 130, 100, 140, 200, 150, 50] ],
             types: {
-                data1: 'area',
+                data1: 'area-spline',
                 data2: 'area-spline' } } })
 }).build('graph')

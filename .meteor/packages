@@ -26,3 +26,4 @@ isaac:underscore2
 # standard-minifier-js@1.2.1
 # shell-server@0.2.1
 ecmascript
+twbs:bootstrap

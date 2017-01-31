@@ -6,40 +6,8 @@ module.exports = __.Cube().add(
         __._db.Chats.insert({
           id: id,
           text: text }) })
-  ).collections({Chats: {}}
-  ).build(),
-
-  __.Module('spark').collections(function() { return {
-      Users: {
-        publish: () => this.Matches = __._db.Users.find({
-            gender: 'F',
-            public_ids: {$exists: true},
-            location: {
-              $near: {
-                $geometry: {
-                  type: "Point",
-                  coordinates: [-118.3096648, 34.0655627] },
-                $maxDistance: 20000,
-                $minDistance: 0 }} }),
-        callback: function(m) {
-            window.Matches = __._db.Users.find({}).fetch()
-            Session.set('index', 0)
-            Session.set('photo-front', this.photoUrl(0))
-            Session.set('photo-back',  this.photoUrl(1)) },
-        collections: {
-          "fs.files": {
-            publish: () => this.Files = __._db["fs.files"].find({
-                _id: { $in: this.Matches.fetch().reduce(((o, a) => o.concat(a.photo_ids) ), []) } }),
-            callback: (m) => this.Files = __._db['fs.files'].find({}).fetch(),
-            collections: {
-              "fs.chunks": {
-                publish: () => __._db["fs.chunks"].find({files_id: {$in: this.Files.fetch().map(a => a._id)}}),
-                callback: (m) => this.Chunks = __._db['fs.chunks'].find({}).fetch() } } } } } }}
-  ).fn({
-    photoUrl: (i, j) => { // es6 feature j=0 is not yet supported
-      if (j == null) {j = 0}
-      return Settings.image_url + (this.Matches || Matches)[i].public_ids[j] + '.jpg' } }
-  ).build('spark'),
+  ).collections({Chats: {}
+  }).build(),
 
   __.Module('camera').onServer(function() {
     const fs = Npm.require('fs')
@@ -127,11 +95,10 @@ module.exports = __.Cube().add(
           secret:    process.env.FACEBOOK_SECRET,
           client_id: process.env.FACEBOOK_CLIENT_ID } } } } ),
 
-  __.Module('chart').collections(() => ({
+  __.Module('main').collections(() => ({
     Ticker:     {publish: () => __._db.Ticker.find()},
     Trade:      {publish: () => __._db.Trade.find()},
     GroupOrder: {publish: () => __._db.GroupOrder.find()} }))
 )
 
-__.isMeteorServer(() => __.meteorStartup(() => {
-}) )
+__.isMeteorServer(() => __.meteorStartup(() => {}) )
