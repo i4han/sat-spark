@@ -19,7 +19,7 @@ __.Module('web').router({
 __.Module('graph').router({path:'graph', layout:'web'}  // router
 //).template(function() { return [__.ID('graph'), html.H1({}, blaze.Each(this, 'ok', __.LOOK(this, 'lookup')))] }
 ).template(function() { return [__.ID('graph'), html.H1({}, blaze.Each(this, 'ok', () => __.LOOK(this, 'lookup')))] }
-).helpers({//lookup: () => 'ok',
+).helpers({ //lookup: () => 'ok',
 ok: () => [{lookup: 'a'}, {lookup: 'b'}, {lookup: 'ok'}]
 }).onRendered(() => {
     let chart = c3.generate({
