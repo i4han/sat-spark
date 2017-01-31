@@ -6,7 +6,7 @@ module.exports = __.Cube().add(
         __._db.Chats.insert({
           id: id,
           text: text }) })
-  ).collections({Chats: {}
+  ).mongo({Chats: {}
   }).build(),
 
   __.Module('camera').onServer(function() {
@@ -77,7 +77,7 @@ module.exports = __.Cube().add(
       public: {
         title: () => o.title,
         //fbAppId: () => process.env.FACEBOOK_CLIENT_ID,
-        collections: {},
+        //collections: {},
         image_url: "http://res.cloudinary.com/sparks/image/upload/",
         upload: "http://" + local_ip + ":3000/upload" },
       cloudinary: {
@@ -95,7 +95,7 @@ module.exports = __.Cube().add(
           secret:    process.env.FACEBOOK_SECRET,
           client_id: process.env.FACEBOOK_CLIENT_ID } } } } ),
 
-  __.Module('main').collections(() => ({
+  __.Module('main').mongo(() => ({
     Ticker:     {publish: () => __._db.Ticker.find()},
     Trade:      {publish: () => __._db.Trade.find()},
     GroupOrder: {publish: () => __._db.GroupOrder.find()} }))

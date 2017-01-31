@@ -16,7 +16,7 @@ __.Module('web').router({
         blaze.Include(this, 'yield'))
 }).build('web')
 
-__.Module('graph').properties({path:'graph', layout:'web'}  // router
+__.Module('graph').router({path:'graph', layout:'web'}  // router
 ).template(() => __.ID('graph')
 ).onRendered(() => {
     let chart = c3.generate({

@@ -28,12 +28,14 @@ __.Module('tabs').template(function() {
     blaze.Each(this, 'tabs', () =>
       ionic.Tab(this, { title: '{label}', path: '{name}', iconOff: '{icon}', iconOn: '{icon}' }) ))
 }).helpers(() => ({
-    tabs: () => 'chat camera spark settings profile'.split(' ').map(a => Sat.module[a].property) })
+    tabs: () => 'chat camera spark settings profile'.split(' ').map(a => Sat.module[a]._) })
 ).build()
 
 __.Module('profile').properties({
-    icon: 'person',
-    path: 'profile'
+    icon: 'person'
+}).router({
+    path: 'profile',
+    layout: 'layout'
 }).template(function() {
   return __.Template(([v, m] = __.View(this)),
         v.title('Profiles'), v.ionListContent('', v.Each('items', () =>
@@ -87,8 +89,10 @@ __.Module('profile').properties({
 }).build('profile')
 
 __.Module('settings').properties({
-    icon: 'gear-a',
-    path: 'settings'
+    icon: 'gear-a'
+}).router({
+    path: 'settings',
+    layout: 'layout'
 }).template(function() {
   return __.Template([v, m] = __.View(this),
     v.title(m.property.label),
@@ -169,8 +173,10 @@ __.Module('def').template(function() {
 
 __.Module('chat').properties({
     icon: 'chatbubbles',
-    path: 'chat',
     hash: '0fc7da9b30f3e2c7'
+}).router({
+    path: 'chat',
+    layout: 'layout'
 }).template(function() {
   return [
     part.title(this, 'Chat'),
@@ -312,8 +318,10 @@ __.Module('chosen').template(function() {
   })(this);
 
   __.Module('spark').properties({
-      path: '/',
       icon: 'flash'
+  }).router({
+      path: '/',
+      layout: 'layout'
   }).template(function() {
     console.log('PART', part);
     return [
@@ -390,8 +398,10 @@ __.Module('chosen').template(function() {
     });
   };
   return __.Module('camera').properties({
-      icon: 'camera',
-      path: 'camera'
+      icon: 'camera'
+  }).router({
+      path: 'camera',
+      layout: 'layout'
   }).template(function() {
     return [
       part.title(this, 'Camera'), html.IMG(this, {
