@@ -23,14 +23,7 @@ __.Module('graph').router({path:'graph', layout:'web'}
     ok: () => [{lookup: 'a'}, {lookup: 'b'}, {lookup: 'ok'}]
 }).properties(o => ({
     draw: (m) => {
-        console.log('draw', m)
-        console.log(__.allCollectionsReady('bcTrades', 'okTrades'))
-        c = ['bcTrades', 'okTrades']
-        console.log(c.length === c.filter(cc => __.isCollectionReady(cc)).length)
-        console.log('c length', c.length)
-        console.log('c filter length', c.filter(cc => __.isCollectionReady(cc)).length)
         if (!__.allCollectionsReady('bcTrades', 'okTrades')) return
-        console.log('start draw')
         let data1 = m.Db.bcTrades.find({}).map(obj => obj.price).slice(-20)
         // let data2 = m.Db.okTrades.find({}).map(obj => obj)
         c3.generate({
@@ -42,11 +35,5 @@ __.Module('graph').router({path:'graph', layout:'web'}
                     data1: 'area-spline',
                     data2: 'area-spline' } } }) }
 })).onRendered(o => () => {
-    console.log('DB', o.Db)
     __.whenCollectionsReady('bcTrades', 'okTrades', o.draw)
-    console.log('collection', o.Db.bcTrades)
-}).onStartup(o => () => {
-    console.log(o.data1)
-    o.fetched = true
-    //o.draw()
 }).build('graph')
