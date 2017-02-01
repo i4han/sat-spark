@@ -10,15 +10,15 @@ let pic_top    = top + box
 let pic_height = height - (pic_top + bottom)
 let v, m
 
-__.Module('layout').head({
+__.Module('layout').head(o => ({
      meta: { name: 'viewport', content: 'width=device-width initial-scale=1.0, user-scalable=no'},
-     title: Settings.title
-}).template(function() {
+     title: o.Settings.title
+})).template(function() {
   return ionic.Body(this,
     ionic.NavBar(this, { class: 'bar-royal' }),
     ionic.NavView(this, blaze.Include(this, 'yield')),
     blaze.Include(this, 'tabs'))
-}).onStartup(() => {
+}).onStartup(o => () => {
   style$('.bar-subfooter').set({ bottom: 48, height: 62 }) }
 ).build()
 
@@ -27,9 +27,9 @@ __.Module('tabs').template(function() {
   return ionic.Tabs(this, { _tabs: '*-icon-top'},
     blaze.Each(this, 'tabs', () =>
       ionic.Tab(this, { title: '{label}', path: '{name}', iconOff: '{icon}', iconOn: '{icon}' }) ))
-}).helpers({
-    tabs: () => 'chat camera spark settings profile'.split(' ').map(a => Sat.module[a]._) }
-).build()
+}).helpers(o => (console.log(o) || {
+    tabs: () => 'chat camera spark settings profile'.split(' ').map(a => o.Modules[a].user)
+})).build()
 
 __.Module('profile').properties({
     icon: 'person'
@@ -88,14 +88,14 @@ __.Module('profile').properties({
   };
 }).build('profile')
 
-__.Module('settings').properties({
+__.Module('settings').properties(o => ({
     icon: 'gear-a'
-}).router({
+})).router({
     path: 'settings',
     layout: 'layout'
 }).template(function() {
   return __.Template([v, m] = __.View(this),
-    v.title(m.property.label),
+    v.title(m._.label),
     v.ionListContent('', v.ionDivider('General'),
         v.ionItemLabelToggle('Online', { id: 'online' }),
         v.ionDivider('Search'),
@@ -138,15 +138,15 @@ __.Module('settings').properties({
       };
     })(this)
   };
-}).onCreated(function() {
+}).onCreated(o => function() {
   m = __.module(this)
   m.style$ageFrom = style$(m.local('#agefrom') + '::-webkit-slider-thumb::after')
-  return m.style$ageTo = style$(m.local('#ageto') + '::-webkit-slider-thumb::before')
-}).onRendered(function() {
+  m.style$ageTo   = style$(m.local('#ageto')   + '::-webkit-slider-thumb::before')
+}).onRendered(o => function() {
   m = __.module(this);
-  this.$('#online').prop('checked', true);
-  this.$to = this.$to || m.$('#ageto');
-  this.$from = this.$from || m.$('#agefrom');
+  this.$('#online').prop('checked', true)
+  this.$to   = this.$to   || m.$('#ageto') // local id
+  this.$from = this.$from || m.$('#agefrom')
   m.unit = (m.$('#agefrom').width() - 28) / (80 - 18);
   this.$from.on('input', evt => {
       var to, val
@@ -196,9 +196,9 @@ __.Module('chat').properties({
       $mp: 0,
       border: 0
     }
-}).helpers(function() {
+}).helpers(o => function() {
   return {
-    chats: () => __._db.Chats.find({}),
+    chats: () => o.Db.Chats.find({}),
     side: () => 'me'
   };
 }).events(function() {
@@ -335,11 +335,11 @@ __.Module('chosen').template(function() {
         src: Session.get('photo-back')
       }))
     ];
-  }).onRendered(function() {
+}).onRendered(o => function() {
     return $('#photo-' + (index = Session.get('index'))).draggable({
       axis: 'y'
     }).on('touchstart', touchStart).on('touchend', touchEnd);
-}).onDestroyed(() => {
+}).onDestroyed(o => () => {
     Session.set('index', index)
     Session.set('photo-front', $('.photo-front').attr('src'))
     Session.set('photo-back', $('.photo-back').attr('src'))
@@ -409,7 +409,7 @@ __.Module('chosen').template(function() {
         style: 'width:100%;'
       })
     ];
-  }).onRendered(function() {
+  }).onRendered(o => function() {
     var options;
     return navigator.camera.getPicture((function(uri) {
       return upload(uri);

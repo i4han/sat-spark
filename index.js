@@ -9,11 +9,11 @@ module.exports = __.Cube().add(
   ).mongo({Chats: {}
   }).build(),
 
-  __.Module('camera').onServer(function() {
-    const fs = Npm.require('fs')
+  __.Module('camera').onServer(o => function() {
+    const fs     = Npm.require('fs')
     const Busboy = Spark.require('busboy')
-    const cloud = Spark.require('cloudinary')
-    const _ = Settings.cloudinary
+    const cloud  = Spark.require('cloudinary')
+    const _      = Sat.setting.cloudinary // o.Settings won't work.
     cloud.config({
       cloud_name: _.cloud_name,
       api_key:    _.api_key,

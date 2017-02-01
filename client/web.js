@@ -8,27 +8,45 @@ let draw = () => new Promise((resolve, reject) => {
 
 __.Module('web').router({
     defaultLayout: true
-}).head({
-    title: Settings.title,
+}).head(o => ({
+    title: o.Settings.title,
     meta: {name:"viewport", content:"width=device-width, initial-scale=1"}
-}).template(function() {
+})).template(function() {
     return __.CLASS('container-fluid',
         blaze.Include(this, 'yield'))
 }).build('web')
 
-__.Module('graph').router({path:'graph', layout:'web'}  // router
-//).template(function() { return [__.ID('graph'), html.H1({}, blaze.Each(this, 'ok', __.LOOK(this, 'lookup')))] }
-).template(function() { return [__.ID('graph'), html.H1({}, blaze.Each(this, 'ok', () => __.LOOK(this, 'lookup')))] }
-).helpers({ //lookup: () => 'ok',
-ok: () => [{lookup: 'a'}, {lookup: 'b'}, {lookup: 'ok'}]
-}).onRendered(() => {
-    let chart = c3.generate({
-        bindto: '#graph',
-        data: {
-            columns: [
-                ['data1', 170, 120, 100, 110, 170, 30],
-                ['data2', 130, 100, 140, 200, 150, 50] ],
-            types: {
-                data1: 'area-spline',
-                data2: 'area-spline' } } })
+__.Module('graph').router({path:'graph', layout:'web'}
+).template(function() {
+    return [__.ID('graph'), html.H1({}, blaze.Each(this, 'ok', () => __.LOOK(this, 'lookup')))]
+}).helpers({ //lookup: () => 'ok',
+    ok: () => [{lookup: 'a'}, {lookup: 'b'}, {lookup: 'ok'}]
+}).properties(o => ({
+    draw: (m) => {
+        console.log('draw', m)
+        console.log(__.allCollectionsReady('bcTrades', 'okTrades'))
+        c = ['bcTrades', 'okTrades']
+        console.log(c.length === c.filter(cc => __.isCollectionReady(cc)).length)
+        console.log('c length', c.length)
+        console.log('c filter length', c.filter(cc => __.isCollectionReady(cc)).length)
+        if (!__.allCollectionsReady('bcTrades', 'okTrades')) return
+        console.log('start draw')
+        let data1 = m.Db.bcTrades.find({}).map(obj => obj.price).slice(-20)
+        // let data2 = m.Db.okTrades.find({}).map(obj => obj)
+        c3.generate({
+            bindto: '#graph',
+            data: {
+                columns: [['data1'].concat(data1),
+                    ['data2', 6500,6600, 6140, 6200, 6150, 6500] ],
+                types: {
+                    data1: 'area-spline',
+                    data2: 'area-spline' } } }) }
+})).onRendered(o => () => {
+    console.log('DB', o.Db)
+    __.whenCollectionsReady('bcTrades', 'okTrades', o.draw)
+    console.log('collection', o.Db.bcTrades)
+}).onStartup(o => () => {
+    console.log(o.data1)
+    o.fetched = true
+    //o.draw()
 }).build('graph')
