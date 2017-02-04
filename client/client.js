@@ -27,7 +27,7 @@ __.Module('tabs').template(function() {
   return ionic.Tabs(this, { _tabs: '*-icon-top'},
     blaze.Each(this, 'tabs', () =>
       ionic.Tab(this, { title: '{label}', path: '{name}', iconOff: '{icon}', iconOn: '{icon}' }) ))
-}).helpers(o => (console.log(o) || {
+}).helpers(o => ({
     tabs: () => 'chat camera spark settings profile'.split(' ').map(a => o.Modules[a].user)
 })).build()
 
