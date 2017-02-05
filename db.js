@@ -1,6 +1,6 @@
 
 
 __.Module('graph').mongo(
-    __.xmap(['bc', 'ok'], ['Trades', 'Ticker', 'Depth'], (k, j) => k + j)
-        .concat(['bcTradesClean', 'okTradesClean'])
+    //__.xmap(['bc', 'ok'], ['Trades', 'Ticker', 'Depth'], (k, j) => k + j)
+        ['bcTradesClean', 'okTradesClean']
 ).build()
