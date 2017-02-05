@@ -13,7 +13,7 @@ module.exports = __.Cube().add(
     const fs     = Npm.require('fs')
     const Busboy = Spark.require('busboy')
     const cloud  = Spark.require('cloudinary')
-    const _      = Sat.setting.cloudinary // o.Settings won't work.
+    const _      = o.Settings.cloudinary // o.Settings won't work.
     cloud.config({
       cloud_name: _.cloud_name,
       api_key:    _.api_key,
