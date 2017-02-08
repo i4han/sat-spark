@@ -19,6 +19,7 @@ class Chart3 {
             types[v.key] = v.type })
         this._keys = keys
         let serial = keys.reduce(((a, k) => a.concat(this._chart.map(v => v[k]))), [])
+        this._config = __.object(this._config, 'line.connectNull', true)
         this._config = __.object(this._config, 'data.keys', {value: keys})
         this._config = __.object(this._config, 'data.names', names)
         this._config = __.object(this._config, 'data.types', types)
@@ -29,7 +30,7 @@ class Chart3 {
         this._c3 = c3.generate(this._config)
         return this }
     load(o) {
-        this._c3.load({json: o, keys:{value: this._keys}}) }
+        this._c3.load({json: o, keys:{value: this._keys}, duration:0}) }
     flow(row) {
         console.log('flow:', row, this._keys)
         // if (['flexion', 'yoyo', 'modified', 'average', 'two'].indexOf(this._name) !== -1 ) return this
@@ -39,7 +40,7 @@ class Chart3 {
 
 const chart3 = (name, chart, obj) => new Chart3(name, chart, obj)
 
-let last = 100, next = 200, chart = [], sma = 19, last_n = 7, G = {}, time = 0
+let last = 100, next = 100, chart = [], sma = 19, last_n = 7, G = {}, time = 0
 let data1, data2, d1, d2
 
 __.Module('robot').router({path:'robot', layout:'web'}
@@ -87,21 +88,26 @@ __.Module('robot').router({path:'robot', layout:'web'}
             chart[last - 1].positive = 0
             chart[last - 1].negative = 0
 
-        chart3('two',      chart, G).data(
-            {key: 'price1',    name: 'btcchina',  type: 'area' },
-            {key: 'price2',    name: 'okcoin',    type: 'area' } ).show()
-        chart3('average',  chart, G).data(
-            {key: 'disparity', name: 'disparity', type: 'area' },
-            {key: 'sma',       name: 'SMA',       type: 'line' } ).show()
-        chart3('modified', chart, G).data(
-            {key: 'price1',    name: 'btcchina',  type: 'area' },
-            {key: 'modified2', name: 'adjust',    type: 'area' } ).show()
-        chart3('yoyo',     chart, G).data(
-            {key: 'yoyo',      name: 'updown',    type: 'area' } ).show()
-        chart3('flexion',  chart, G).data(
-            {key: 'flexion',   name: 'flexion',   type: 'bar'  },
-            {key: 'positive',  name: 'positive',  type: 'line' },
-            {key: 'negative',  name: 'negative',  type: 'line' } ).show()
+        chart3('two',      chart, G)
+        .data( {key: 'price1',    name: 'btcchina',  type: 'area' },
+               {key: 'price2',    name: 'okcoin',    type: 'area' } )
+        .show()
+        chart3('average',  chart, G)
+        .data( {key: 'disparity', name: 'disparity', type: 'area' },
+               {key: 'sma',       name: 'SMA',       type: 'line' } )
+        .show()
+        chart3('modified', chart, G)
+        .data( {key: 'price1',    name: 'btcchina',  type: 'area' },
+               {key: 'modified2', name: 'adjust',    type: 'area' } )
+        .show()
+        chart3('yoyo',     chart, G)
+        .data( {key: 'yoyo',      name: 'updown',    type: 'area' } )
+        .show()
+        chart3('flexion',  chart, G)
+        .data( {key: 'flexion',   name: 'flexion',   type: 'bar'  },
+               {key: 'positive',  name: 'positive',  type: 'line' },
+               {key: 'negative',  name: 'negative',  type: 'line' } )
+        .show()
     },
     nextLine: () => {
             let nline = {}
