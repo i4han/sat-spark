@@ -43,7 +43,7 @@ const chart3 = (name, chart, obj) => new Chart3(name, chart, obj)
 let last = 100, next = 100, chart = [], sma = 19, last_n = 7, G = {}, time = 0
 let data1, data2, d1, d2
 
-__.Module('robot').router({path:'robot', layout:'web'}
+__.Module('robot').router({path:'t2', layout:'web'}
 ).template(() => [
         __.CLASS('row', __.ID('two' )),
         __.CLASS('row', __.ID('average')),
@@ -65,28 +65,24 @@ __.Module('robot').router({path:'robot', layout:'web'}
             chart[i].sma       = __.average.apply([], __.lastN(chart.slice(0, i + 1).map(v => v.disparity), sma))
             chart[i].modified2 = d2[i] + chart[i].sma
             chart[i].yoyo      = d1[i] - chart[i].modified2
-            chart[i].flexion   = 0
-            if (i === 1) {
-                chart[0].positive = chart[0].posLine = 0
-                chart[0].negative = chart[0].negLine = 0 }
+            chart[i].flexion   = null
             if (i < 2) continue
             let yoyo3 = __.lastN(chart.slice(0, i + 1).map(v => v.yoyo), 3)
-            chart[i - 1].flexion = ((yoyo3[0] >= yoyo3[1] && yoyo3[1] >= yoyo3[2]) ||
-                (yoyo3[0] <= yoyo3[1] && yoyo3[1] <= yoyo3[2])) ? 0 : yoyo3[1]
-            chart[i - 1].positive = 0
-            chart[i - 1].negative = 0
-            if (chart[i - 1].flexion > 0) {
-                chart[i - 1].positive = __.average.apply([], __.lastN(
-                    chart.slice(0, i - 1).map(v => v.positive), last_n, v => v > 0 ).concat(chart[i - 1].flexion) )
-                chart[i - 1].posLine  = chart[i - 1].positive
-                chart[i - 1].negLine  = chart[i - 2].negLine }
-            else if (chart[i - 1].flexion < 0) {
-                chart[i - 1].negative = __.average.apply([], __.lastN(
-                    chart.slice(0, i - 1).map(v => v.negative), last_n, v => v < 0 ).concat(chart[i - 1].flexion) )
-                chart[i - 1].negLine  = chart[i - 1].negative
-                chart[i - 1].posLine  = chart[i - 2].posLine } }
-            chart[last - 1].positive = 0
-            chart[last - 1].negative = 0
+
+            chart[i - 1].positive = undefined
+            chart[i - 1].negative = undefined
+            if (chart[i - 1].yoyo > 0) {
+                let flexion = (yoyo3[0] <= yoyo3[1] && yoyo3[1] >= yoyo3[2]) ? yoyo3[1] : 0
+                if ( (chart[i - 1].flexion = flexion) > 0 )
+                    chart[i - 1].positive = __.average.apply([], __.lastN(
+                        chart.slice(0, i - 1).map(v => v.positive), last_n, v => v > 0 ).concat(flexion) ) }
+            else if (chart[i - 1].yoyo < 0 ) {
+                let flexion = (yoyo3[0] >= yoyo3[1] && yoyo3[1] <= yoyo3[2]) ? yoyo3[1] : 0
+                if ( (chart[i - 1].flexion = flexion) < 0 )
+                    chart[i - 1].negative = __.average.apply([], __.lastN(
+                        chart.slice(0, i - 1).map(v => v.negative), last_n, v => v < 0 ).concat(flexion) ) } }
+        chart[last - 1].positive = undefined
+        chart[last - 1].negative = undefined
 
         chart3('two',      chart, G)
         .data( {key: 'price1',    name: 'btcchina',  type: 'area' },
@@ -120,9 +116,9 @@ __.Module('robot').router({path:'robot', layout:'web'}
                  __.lastN(chart.map(v => v.disparity), sma - 1).concat(nline.disparity) )
             nline.modified2 = price2 + nline.sma
             nline.yoyo      = price1 - nline.modified2
-            nline.flexion   = 0
-            nline.positive  = 0
-            nline.negative  = 0
+            nline.flexion   = undefined
+            nline.positive  = undefined
+            nline.negative  = undefined
             let yoyo3 = __.lastN(chart.map(v => v.yoyo), 2).concat(nline.yoyo)
             console.log('last:b', chart[last - 1])
             if (chart[last - 1].yoyo > 0) {
