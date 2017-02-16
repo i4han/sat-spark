@@ -1,8 +1,6 @@
 
 let c3 = require('c3')
-
-let xArray = require('xarray')
-let xA = a => (new xArray()).concat(a)
+let in$ = require('incredibles')
 
 __.Module('graph').router({path:'t1', layout:'web'}
 ).template(() => [
@@ -24,11 +22,11 @@ __.Module('graph').router({path:'t1', layout:'web'}
         if (!__.allCollectionsReady('bcTradesClean', 'okTradesClean')) return
         let d1 = m.Db.bcTradesClean.find({}).map(v => v)
         let d2 = m.Db.okTradesClean.find({}).map(v => v)
-        let data1 = xA(d1.map(v => v.price))
-        let data2 = xA(d2.map(v => v.price))
+        let data1 = in$(d1.map(v => v.price))
+        let data2 = in$(d2.map(v => v.price))
         console.log(d1[0], d1[d1.length -1], d1.length)
-        let data3 = xA([1,2,3]) // args?
-        let data4 = xA([4,3,5])
+        let data3 = in$([1,2,3]) // args?
+        let data4 = in$([4,3,5])
         c3.generate({ bindto: '#graph1',
             axis:  { y: { max: 6850, min: 6780 } },
             point: { r: 2},

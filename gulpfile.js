@@ -1,4 +1,4 @@
 
 if ( 'undefined' === typeof Meteor ) {
     let bypassMeteorRequire = require
-    bypassMeteorRequire('./sat/gulp.js')  }
+    bypassMeteorRequire('../node_modules/cubesat/sat.js')  }
