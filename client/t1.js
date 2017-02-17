@@ -1,6 +1,6 @@
 
 let c3 = require('c3')
-let in$ = require('incredibles')
+// let in$ = require('incredibles')
 
 __.Module('graph').router({path:'t1', layout:'web'}
 ).template(() => [

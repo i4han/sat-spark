@@ -1,14 +1,14 @@
 'use strict'
 
 const c3 = require('c3')
-const i$ = require('incredibles')
+const in$ = require('incredibles')
 
 class Chart3 {
     constructor (name, chart, obj) {
         this._name = name
         this._chart = chart
-        this._config = i$({ bindto: '#' + name, point: { r: 2 }}).add('data.json',  chart)
-        if ( i$(obj).is('object') ) {
+        this._config = in$({ bindto: '#' + name, point: { r: 2 }}).add('data.json',  chart)
+        if ( in$(obj).is('object') ) {
             obj[name] = this
             this.o = obj } }
     data (...a) {
@@ -38,7 +38,7 @@ class Chart3 {
 
 const chart3 = (name, chart, obj) => new Chart3(name, chart, obj)
 
-let last = 300, next = 300, sma = 19, last_n = 7, G = i$({}), time = 0
+let last = 300, next = 300, sma = 19, last_n = 7, G = in$({}), time = 0
 let data = [], wdata = []
 let price1, price2, bid1, bid2, ask1, ask2, pos, neg
 price1 = price2 = bid1 = bid2 = ask1 = ask2 = pos = neg = null
@@ -55,7 +55,7 @@ __.Module('robot2').router({path:'t3', layout:'web'}
 ]).properties(o => ({
     draw: (m) => {
         wdata = m.Db.Depth.find({}).map(v => v)
-        wdata = i$(wdata).slice(21)
+        wdata = in$(wdata).slice(21)
         data  = wdata.slice(0, last)
         for(let i = 0; i < last; i++) {
             price1 = data[i].price1 || price1
@@ -65,7 +65,7 @@ __.Module('robot2').router({path:'t3', layout:'web'}
             ask1   = data[i].ask1   || ask1
             ask2   = data[i].ask2   || ask2
             data[i].disparity = (price1 && price2) ? price2 - price1 : null
-            data[i].sma       = i$(data).slice(0, i + 1).map(v => v.disparity).slice(-sma).average()
+            data[i].sma       = in$(data).slice(0, i + 1).map(v => v.disparity).slice(-sma).average()
             data[i].modified1 = price1 ? price1 + data[i].sma : null
             data[i].yoyo      = price2 && data[i].modified1 ? price2 - data[i].modified1 : null
             data[i].flexion   = null
