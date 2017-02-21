@@ -5,11 +5,11 @@ const in$ = require('incredibles')
 
 class Chart3 {
     constructor (name, chart, obj) {
-        this._name = name
-        this._chart = chart
-        this._config = in$({ bindto: '#' + name, point: { r: 2 }}).add('data.json',  chart)
+        this._name   = name
+        this._chart  = chart
+        this._config = in$({ bindto: '#' + name, point: { r: 2 }}).dset('data.json',  chart)
         if ( in$(obj).is('object') ) {
-            obj[name] = this
+            obj.set(name, this)
             this.o = obj } }
     data (...a) {
         let names = {}, types = {}, keys = [], colors = {}
@@ -20,13 +20,14 @@ class Chart3 {
             if (v.color) colors[v.key] = v.color  })
         this._keys = keys
         let serial = keys.reduce(((a, k) => a.concat(this._chart.map(v => v[k]))), []).filter(v => __.isNumber(v) )
-        this._config.add( 'line.connectNull', true )
-        this._config.add( 'data.keys',  {value: keys} )
-        this._config.add( 'data.names',  names  )
-        this._config.add( 'data.colors', colors )
-        this._config.add( 'data.types',  types  )
-        this._config.add( 'axis.y.max', Math.max.apply({}, serial) )
-        this._config.add( 'axis.y.min', Math.min.apply({}, serial) )
+        this._config.dset( 'line.connectNull', true )
+        this._config.dset( 'data.keys',  {value: keys} )
+        this._config.dset( 'data.names',  names  )
+        this._config.dset( 'data.colors', colors )
+        this._config.dset( 'data.types',  types  )
+        console.log('data',this._config.val)
+        this._config.dset( 'axis.y.max', Math.max.apply({}, serial) )
+        this._config.dset( 'axis.y.min', Math.min.apply({}, serial) )
         return this }
     show () {
         this._c3 = c3.generate(this._config)
@@ -43,16 +44,16 @@ let data = [], wdata = []
 let price1, price2, bid1, bid2, ask1, ask2, pos, neg
 price1 = price2 = bid1 = bid2 = ask1 = ask2 = pos = neg = null
 
-__.Module('robot2').router({path:'t3', layout:'web'}
-).template(() => [
+__.Module('robot2').router({path:'t3', layout:'web'})
+.template(() => [
         __.CLASS('row', __.ID('btc' )),
         __.CLASS('row', __.ID('okc' )),
         __.CLASS('row', __.ID('compare' )),
         __.CLASS('row', __.ID('average')),
         __.CLASS('row', __.ID('modified' )),
         __.CLASS('row', __.ID('yoyo')),
-        __.CLASS('row', __.ID('flexion'))
-]).properties(o => ({
+        __.CLASS('row', __.ID('flexion'))  ])
+.properties(o => ({
     draw: (m) => {
         wdata = m.Db.Depth.find({}).map(v => v)
         wdata = in$(wdata).slice(21)
@@ -92,7 +93,7 @@ __.Module('robot2').router({path:'t3', layout:'web'}
         .data( { key: 'ask1',      name: 'btc ask',   type: 'area', color: 'rgba(0, 0, 255, 50)' },
                { key: 'bid1',      name: 'btc bid',   type: 'area', color: 'rgba(0, 0, 255, 70)' },
                { key: 'price1',    name: 'btc',       type: 'line' } ).show()
-       chart3( 'okc',   data, G )
+        chart3( 'okc',   data, G )
         .data( { key: 'ask2',      name: 'okc ask',   type: 'area', color: 'rgba(255, 0, 0, 20)' },
                { key: 'bid2',      name: 'okc bid',   type: 'area', color: 'rgba(255, 0, 0, 40)' },
                { key: 'price2',    name: 'okc',       type: 'line' } ).show()
