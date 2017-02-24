@@ -9,8 +9,6 @@ __.Module('camera').onServer(o => function() {
     const fs     = Npm.require('fs')
     const Busboy = Spark.require('busboy')
     const cloud  = Spark.require('cloudinary')
-    console.log(1, o)
-    console.log(2, __._Settings)
     const _      = o.Settings.cloudinary // o.Settings won't work.
     cloud.config({
         cloud_name: _.cloud_name,
