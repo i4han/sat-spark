@@ -1,9 +1,9 @@
 
 
 __.Module('chat').methods(() => ({
-    says: (id, text) => __._db.Chats.insert({ id: id, text: text }) })
-).mongo({Chats: {}
-}).build()
+    says: (id, text) => __._db.Chats.insert({ id: id, text: text }) }))
+.mongo({Chats: {}})
+.build()
 
 __.Module('camera').onServer(o => function() {
     const fs     = Npm.require('fs')
@@ -32,8 +32,8 @@ __.Module('camera').onServer(o => function() {
             next() } })
         Router.route('/upload', {where: 'server'}).post(function() {
             this.response.writeHead(200, {'Content-Type': 'text/plain'})
-            this.response.end("ok") }) }
-).build()
+            this.response.end("ok") }) })
+.build()
 
 __.Module('main').mongo(() => ({
     Ticker:     {publish: () => __._db.Ticker.find()},

@@ -1,7 +1,7 @@
 'use strict'
 
 const c3  = require('c3')
-const inc = require('incredibles')('$')
+const inc = require('incredibles')
 
 let c3map = new Map()
 class Chart3 {
@@ -27,7 +27,7 @@ class Chart3 {
     show () {
         this.c3 = c3.generate(this.config.__)  }
     load (o) {
-        this.c3.load( { json: o,     keys:{value: this.keys}, duration:0 } )  }
+        this.c3.load( { json: o, keys:{value: this.keys}, duration:0 } )  }
     flow (row) {
         this.c3.flow( { json: [row], keys:{value: this.keys}, duration:0 } )  }  }
 
@@ -49,6 +49,7 @@ __.Module('robot2').router( {path:'t3', layout:'web'} )
     draw: m => {
         console.log(50, m, m.collection)
         wdata = m.Db.Depth.find({}).map(v => v)
+        console.log(wdata.slice(21).$)
         wdata = wdata.slice(21).$
         data  = wdata.slice(0, last)
         for(let i = 0; i < last; i++) {
@@ -95,10 +96,8 @@ __.Module('robot2').router( {path:'t3', layout:'web'} )
         new Chart3( 'compare', data)
         .style( { key: 'ask1',      name: 'btc ask',   type: 'area', color: 'rgba(0, 0, 255, 50)' },
                 { key: 'bid1',      name: 'btc bid',   type: 'area', color: 'rgba(0, 0, 255, 70)' },
-            //    {key: 'price1',    name: 'btc',       type: 'line' },
                 { key: 'ask2',      name: 'ok ask',    type: 'area', color: 'rgba(255, 0, 0, 20)' },
                 { key: 'bid2',      name: 'ok bid',    type: 'area', color: 'rgba(255, 0, 0, 40)' } )
-            //    {key: 'price2',    name: 'ok',        type: 'line' }
         .show()
         new Chart3( 'average',   data)
         .style( { key: 'disparity', name: 'disparity', type: 'area' },
@@ -140,19 +139,18 @@ __.Module('robot2').router( {path:'t3', layout:'web'} )
                 let flexion = (yoyo3[0] <= yoyo3[1] && yoyo3[1] >= yoyo3[2]) ? yoyo3[1] : 0
                 data[last - 1].flexion = flexion
                 if (flexion)
-                    data[last - 1].positive = data.filter(v => v.positive > 0)
+                    data[last - 1].positive = data.filter( v => v.positive > 0 )
                     .slice(-last_n).concat(flexion).average(v => v.positive)  }
             else if (data[last - 1].yoyo < 0) {
                 newline.negOpper = ( neg = ask2 - bid1 - newline.sma )
                 let flexion = (yoyo3[0] >= yoyo3[1] && yoyo3[1] <= yoyo3[2]) ? yoyo3[1] : 0
                 data[last - 1].flexion = flexion
                 if (flexion)
-                    data[last - 1].negative = data.filter(v => v.negative > 0)
-                    .slice(-last_n).concat(flexion).average(v => v.positive)  }
+                    data[last - 1].negative = data.filter( v => v.negative > 0 )
+                    .slice(-last_n).concat(flexion).average( v => v.positive )  }
             c3map.get('flexion').load(data)
             c3map.forEach((v,k) => c3map.get(k).flow(newline))
-            data.shift()
-            data.push(newline)
+            data.shift$().push(newline)
             next++  }  }))
 .onRendered(o => () => {
     __.whenCollectionsReady('Depth', o.draw)

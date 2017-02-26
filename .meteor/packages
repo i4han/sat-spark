@@ -26,3 +26,4 @@ spacebars@1.0.12
 ecmascript
 twbs:bootstrap
 isaac:cubesat
+practicalmeteor:mocha
