@@ -10,48 +10,50 @@ let pic_top    = top + box
 let pic_height = height - (pic_top + bottom)
 let v, m
 
-__.Module('layout').head(o => ({
+__.Module('layout')
+.head(o => ({
      meta: { name: 'viewport', content: 'width=device-width initial-scale=1.0, user-scalable=no'},
-     title: o.Settings.title
-})).template(function() {
-  return ionic.Body(this,
-    ionic.NavBar(this, { class: 'bar-royal' }),
-    ionic.NavView(this, blaze.Include(this, 'yield')),
-    blaze.Include(this, 'tabs'))
-}).onStartup(o => () => {
-  style$('.bar-subfooter').set({ bottom: 48, height: 62 }) }
-).build()
+     title: o.Settings.title  }))
+.template(  function() {
+    return ionic.Body(this,
+        ionic.NavBar(this, { class: 'bar-royal' }),
+        ionic.NavView(this, blaze.Include(this, 'yield')),
+        blaze.Include(this, 'tabs'))  })
+.onStartup(  o => () => {
+  style$('.bar-subfooter').set({ bottom: 48, height: 62 }) }  )
+.build()
 
 
-__.Module('tabs').template(function() {
-  return ionic.Tabs(this, { _tabs: '*-icon-top'},
-    blaze.Each(this, 'tabs', () =>
-      ionic.Tab(this, { title: '{label}', path: '{name}', iconOff: '{icon}', iconOn: '{icon}' }) ))
-}).helpers(o => ({
-    tabs: () => 'chat camera spark settings profile'.split(' ').map(a => o.Modules[a].user)
-})).build()
+__.Module('tabs')
+.template(  function() {
+    return ionic.Tabs(this, { _tabs: '*-icon-top'},
+        blaze.Each(this, 'tabs', () =>
+            ionic.Tab(this, { title: '{label}', path: '{name}', iconOff: '{icon}', iconOn: '{icon}' }) ))  })
+.helpers(o => ({
+    tabs: () => 'chat camera spark settings profile'.split(' ').map(a => o.Modules[a].user)  }))
+.build()
 
-__.Module('profile').properties({
-    icon: 'person'
-}).router({
-    path: 'profile',
-    layout: 'layout'
-}).template(function() {
-  return __.Template(([v, m] = __.View(this)),
+__.Module('profile')
+.properties({ icon: 'person' })
+.router({
+    path: 'profile'
+  , layout: 'layout' })
+.template(  function() {
+    return __.Template(([v, m] = __.View(this)),
         v.title('Profiles'), v.ionListContent('', v.Each('items', () =>
            ionic.Item(this, { buttonRight: true },
               html.H2(this, 'title {title} content &#123; &#125; {content} works!'),
                 html.P(this, cube.lookupInView(this, 'content')), html.BUTTON(this, { _button: '* *-positive' },
                     ionic.Icon(this, { icon: 'ios-telephone' })))
-        )), v.ionSubfooterButton({ id: 'facebook' }, 'login with facebook'))
-}).helpers({
+        )), v.ionSubfooterButton({ id: 'facebook' }, 'login with facebook'))  })
+.helpers({
     items: () => [
         { title: 'hello6', content: 'world6' },
         { title: 'hello1', content: 'world1' },
         { title: 'hello2', content: 'world2' },
         { title: 'hello3', content: 'world3' } ],
-    token: () => facebookConnectPlugin.getAccessToken((token => Session.set('fbToken', token)), function() {})
-}).events(function() {
+    token: () => facebookConnectPlugin.getAccessToken((token => Session.set('fbToken', token)), function() {})  })
+.events(  function() {
   return {
     'touchend #facebook': function() {
       return facebookConnectPlugin.login(['publish_actions'], (function() {
@@ -82,18 +84,15 @@ __.Module('profile').properties({
           return console.log(data);
         }), function(e) {
           return console.log('Login Status fail', e);
-        });
-      });
-    }
-  };
-}).build('profile')
+        }) }) } } })
+.build('profile')
 
-__.Module('settings').properties(o => ({
-    icon: 'gear-a'
-})).router({
-    path: 'settings',
-    layout: 'layout'
-}).template(function() {
+__.Module('settings')
+.properties(o => ({ icon: 'gear-a' }))
+.router({
+    path: 'settings'
+  , layout: 'layout' })
+.template(function() {
   return __.Template([v, m] = __.View(this),
     v.title(m._.label),
     v.ionListContent('', v.ionDivider('General'),
@@ -107,8 +106,8 @@ __.Module('settings').properties(o => ({
         v.ionDivider('Notification'),
         v.ionItemLabelToggle('New matches', { id: 'new-matches' }),
         v.ionItemLabelToggle('Messages', { id: 'message' })),
-        v.ionSubfooterButton({ id: 'logout' }, 'logout') )
-}).style({
+        v.ionSubfooterButton({ id: 'logout' }, 'logout') )  })
+.style({
     'local_agefrom::-webkit-slider-thumb::after': {
       backgroundColor: '#387ef5',
       left: 28,
@@ -119,11 +118,11 @@ __.Module('settings').properties(o => ({
     'local_agefrom::-webkit-slider-thumb::before': {
       height: 0 },
     'local_ageto::-webkit-slider-thumb::before': {
-      height: 2.001 }
-}).helpers(() => ({
+      height: 2.001 }  })
+.helpers(() => ({
     go:    () => Session.get('go'),
-    login: () => Session.get('loginStatus') })
-).events(function() {
+    login: () => Session.get('loginStatus') })  )
+.events(function() {
   return {
     'touchend #logout': function() {
       return facebookConnectPlugin.logout((function() {
