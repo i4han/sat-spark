@@ -6,7 +6,7 @@ const ionTags = `Body Content FooterBar HeaderBar Icon Item List Modal NavBackBu
 ionTags.forEach(tag =>
   ionic[tag] = (_, o, ...args) => {
     let iTag = 'ion' + tag
-    return __.isUndefined(o)  ? cube.include(     _, iTag) :
+    return __.isUndefined(o)  ? cube.include     (_, iTag) :
       __.isArray(o)           ? cube.includeBlock(_, iTag, () => o) :
       __.isBlazeElement(o)    ? cube.includeBlock(_, iTag, () => [o].concat(args)) :
       __.isUndefined(args[0]) ? cube.includeAttr (_, iTag, o) : cube.includeAttrBlock(_, iTag, o, () => args) })
