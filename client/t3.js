@@ -1,14 +1,14 @@
 'use strict'
 
 const c3  = require('c3')
-const inc = require('incredibles')
+const in$ = require('incredibles')
 
 let c3map = new Map()
 class Chart3 {
     constructor (name, data) {
         c3map.set(name, this)
         this.data   = data
-        this.config = inc.$({bindto: '#' + name, point: {r: 2}}).dset('data.json',  data)  }
+        this.config = in$.from({bindto: '#' + name, point: {r: 2}}).setAt('data.json',  data)  }
     style (...a) {
         let names = {}, types = {}, keys = [], colors = {}
         a.forEach((v, i) => {
@@ -18,11 +18,11 @@ class Chart3 {
             if (v.color) colors[v.key] = v.color  })
         this.keys = keys
         let serial = keys.reduce(((a, k) => a.concat(this.data.map(v => v[k]))), []).filter(v => __.isNumber(v) )
-        this.config.dset( 'line.connectNull', true )
-        .dset( 'data.keys',  {value: keys} ).dset( 'data.names',  names  )
-        .dset( 'data.colors', colors )      .dset( 'data.types',  types  )
-        .dset( 'axis.y.max', Math.max.apply({}, serial) )
-        .dset( 'axis.y.min', Math.min.apply({}, serial) )
+        this.config.setAt( 'line.connectNull', true )
+        .setAt( 'data.keys',  {value: keys} ).setAt( 'data.names',  names  )
+        .setAt( 'data.colors', colors )      .setAt( 'data.types',  types  )
+        .setAt( 'axis.y.max', Math.max.apply({}, serial) )
+        .setAt( 'axis.y.min', Math.min.apply({}, serial) )
         return this }
     show () {
         this.c3 = c3.generate(this.config.__)  }
@@ -36,21 +36,14 @@ let data = [], wdata = []
 let price1, price2, bid1, bid2, ask1, ask2, pos, neg
 price1 = price2 = bid1 = bid2 = ask1 = ask2 = pos = neg = null
 
-__.Module('robot2').router( {path:'t3', layout:'web'} )
-.template(() => [
-        __.CLASS('row', __.ID('btc' )),
-        __.CLASS('row', __.ID('okc' )),
-        __.CLASS('row', __.ID('compare' )),
-        __.CLASS('row', __.ID('average')),
-        __.CLASS('row', __.ID('modified' )),
-        __.CLASS('row', __.ID('yoyo')),
-        __.CLASS('row', __.ID('flexion'))  ])
+in$.module('robot2').router( {path:'t3', layout:'web'} )
+.body( v=>'btc okc compare average modified yoyo flexion'.split(' ').map(w=>v.id(w)) )
 .properties(  o => ({
     draw: m => {
         console.log(50, m, m.collection)
         wdata = m.Db.Depth.find({}).map(v => v)
-        console.log(wdata.slice(21).$)
-        wdata = wdata.slice(21).$
+        console.log(wdata.slice(21).into$)
+        wdata = wdata.slice(21).into$
         data  = wdata.slice(0, last)
         for(let i = 0; i < last; i++) {
             price1 = data[i].price1 || price1
@@ -158,4 +151,4 @@ __.Module('robot2').router( {path:'t3', layout:'web'} )
         e.stopImmediatePropagation()
         o.nextLine()
         return false })  })
-.build('robot2')
+.build()

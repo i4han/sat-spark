@@ -7,7 +7,8 @@ __.Module('web')
 .template(function() {
     return __.CLASS('container-fluid', blaze.Include(this, 'yield'))  })
 .onRendered(o => () => {
-    style$('html').set('overflow', 'scroll')  })
+    console.log('rendered')
+    style$('body').set('overflow', 'scroll')  })
 .build('web')
 
 __.Module('blank')

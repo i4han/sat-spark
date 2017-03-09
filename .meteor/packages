@@ -11,6 +11,7 @@ jquery@1.11.9
 mizzao:jquery-ui
 isaac:atomic
 isaac:spark
+isaac:cubesat
 meteor-base@1.0.4
 mongo@1.1.13
 blaze-html-templates@1.0.4
@@ -25,5 +26,4 @@ spacebars@1.0.12
 # shell-server@0.2.1
 ecmascript
 twbs:bootstrap
-isaac:cubesat
 practicalmeteor:mocha
