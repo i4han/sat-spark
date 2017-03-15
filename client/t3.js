@@ -25,7 +25,7 @@ class Chart3 {
         .setAt( 'axis.y.min', Math.min.apply({}, serial) )
         return this }
     show () {
-        this.c3 = c3.generate(this.config.__)  }
+        this.c3 = c3.generate(this.config.value)  }
     load (o) {
         this.c3.load( { json: o, keys:{value: this.keys}, duration:0 } )  }
     flow (row) {

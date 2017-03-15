@@ -1,7 +1,7 @@
 'use strict'
 
 let in$ = require('incredibles')
-let i9$, iN$, iNcredible$
+
 in$.module('map')
 .router({ path: 'map', layout: 'blank' })
 .head(o => ({
@@ -10,7 +10,7 @@ in$.module('map')
         { name:"viewport", content:"initial-scale=1.0" }
       , { charset:'utf-8' }  ]
   , script: { src: o.Public.google_maps_api_url + "&libraries=places&callback=init.Map" } }))
-.body( v => v
+.body( v=>v
     .include('map-input')
     .id('map', v=>v.id('toggle', '<'))
     .id('view', v=>v.include('view') ) )
@@ -59,7 +59,7 @@ in$.module('map')
                         document.getElementById('sizeButton').innerHTML = '>'
                         document.getElementById('map').style.width = '50%'
                         google.maps.event.trigger(map, 'resize')  }
-                    return false  } ).__).log().__ )
+                    return false  } ).value).log().value )
 
         autoComplete(map)
         let layer = new google.maps.KmlLayer({
