@@ -33,7 +33,7 @@ in$.module('map')
           , mapTypeControlOptions: {position: 3}  })
         let control = map.controls[8]
         in$.htmlElement(document.createElement('div'))
-        .invoke$(control.push.bind(control))
+        .openChain(control.push.bind(control))
         .appendChild(
             in$.htmlElement(document.createElement('div'))
             .add({
@@ -59,7 +59,7 @@ in$.module('map')
                         document.getElementById('sizeButton').innerHTML = '>'
                         document.getElementById('map').style.width = '50%'
                         google.maps.event.trigger(map, 'resize')  }
-                    return false  } ).value).log().value )
+                    return false  } ).value).value )
 
         autoComplete(map)
         let layer = new google.maps.KmlLayer({
@@ -70,15 +70,13 @@ in$.module('map')
         Meteor.setTimeout( () => {
             map.setCenter({lat: 53.497, lng: 246.86})
             map.setZoom(13)  }, 2000)
-            $('.gm-style').append('<div id="toggle">&lg;</div>')
-        console.log(layer)  }  })
+            $('.gm-style').append('<div id="toggle">&lg;</div>')  }  })
 .build('map')
 
 in$.module('map-input')
 .script( () => {
     function autoComplete (map) {
         let input = document.getElementById('pac-input')
-        console.log(input)
         let searchBox = new google.maps.places.SearchBox(input)
         // map.controls[google.maps.ControlPosition.TOP_LEFT].push(input)
         // let box = new google.maps.places.SearchBox(document.getElementById('pac-input'))
@@ -111,9 +109,7 @@ in$.module('map-input')
               bounds.union(place.geometry.viewport)
             } else {
               bounds.extend(place.geometry.location) }  })
-          map.fitBounds(bounds)
-        })
-        console.log(map)  } })
+          map.fitBounds(bounds)  })  } })
 .body( v=>v
     .class( 'form-group float-label-control'
       , v=>v.LABEL('Search title')
@@ -130,25 +126,8 @@ in$.module('map-input')
 
 in$.module('view').router({path:'view', layout:'blank'})
 .body( v=>v
-    .DIV({class:'viewitem'}, v.name, v.view.name, console.log(v.view), v=>v.P('hello') )
+    .DIV({class:'viewitem'}, v.name, v.view.name, v=>v.P('hello') )
     .class('viewitem', 'it')
     .class('viewitem', 'works!') )
 .style({ '.viewitem': { width: '93%', height: 100, margin: 15, background: 'white' }})
 .build('view')
-
-
-/*
-.style( v => v.assign(
-    { '.viewitem': { width: '93%', height: 100, margin: 15, background: 'white' }
-    , '.viewitem': { width: '93%', height: 100, margin: 15, background: 'white' }
-}))
-.style( v => v
-    .set('.viewitem', { width: '93%', height: 100, margin: 15, background: 'white' })
-    .set('.viewitem', { width: '93%', height: 100, margin: 15, background: 'white' })
-    .set('.viewitem', { width: '93%', height: 100, margin: 15, background: 'white' })
-.style(v =>
-    ({'.viewitem': { width: '93%', height: 100, margin: 15, background: 'white' }
-    , '.viewitem': {}
-}))
-.build()
-*/
