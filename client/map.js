@@ -12,7 +12,7 @@ in$.module('map')
   , script: { src: o.Public.google_maps_api_url + "&libraries=places&callback=init.Map" } }))
 .body( v=>v
     .include('map-input')
-    .id('map', v=>v.id('toggle', '<'))
+    .id('map',  v=>v.id('toggle', '<'))
     .id('view', v=>v.include('view') ) )
 .style({
     '#map':  { height: '100%', width: '50%', float: 'left' }
