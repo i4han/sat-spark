@@ -33,7 +33,7 @@ in$.module('map')
           , mapTypeControlOptions: {position: 3}  })
         let control = map.controls[8]
         in$.htmlElement(document.createElement('div'))
-        .openChain(control.push.bind(control))
+        .tap(control.push.bind(control))
         .appendChild(
             in$.htmlElement(document.createElement('div'))
             .add({
