@@ -6,7 +6,7 @@ const ionTags = `Body Content FooterBar HeaderBar Icon Item List Modal NavBackBu
 ionTags.forEach(tag =>
   ionic[tag] = (_, o, ...args) => {
     let iTag = 'ion' + tag
-    return __.isUndefined(o)  ? cube.include(     _, iTag) :
+    return __.isUndefined(o)  ? cube.include     (_, iTag) :
       __.isArray(o)           ? cube.includeBlock(_, iTag, () => o) :
       __.isBlazeElement(o)    ? cube.includeBlock(_, iTag, () => [o].concat(args)) :
       __.isUndefined(args[0]) ? cube.includeAttr (_, iTag, o) : cube.includeAttrBlock(_, iTag, o, () => args) })
@@ -25,10 +25,10 @@ __.Parts(() => ({
       HTML.Raw(options.map( l => '<option' + (l === selected ? ' selected>' + l : '>' + l) + '</option>').join(''))),
     ionListContent:     (_, ...args) => ionic.Content(_, ionic.List.apply(null, __.array([_], args))),
     ionDivider:         (_, divider) => html.DIV(_, { class: 'item item-divider' }, divider),
-    ionItemLabelToggle: (_, label, attr)       => ionic.Item(_, Sat.part.ionLabel(_, label), Sat.part.ionToggle(_, attr)),      // Sat.part -> this? arrow function 쓰면 this 못씀.
-    ionItemLabelRange:  (_, label, attr, l, r) => ionic.Item(_, Sat.part.ionLabel(_, label), Sat.part.ionRange(_, attr, l, r)), // 에러 때문에 this -> Sat.part로 고쳤음.
-    ionItemLabelSelect: (_, label, attr, s, o) => ionic.Item(_, Sat.part.ionLabel(_, label), Sat.part.ionSelect(_, attr, s, o)),
-    ionItemLabelList:   (_, label, ...args)    => ionic.Item(_, Sat.part.ionLabel(_, label), args),
+    ionItemLabelToggle: (_, label, attr)       => ionic.Item(_, __._Parts.ionLabel(_, label), __._Parts.ionToggle(_, attr)),      // Sat.part -> this? arrow function 쓰면 this 못씀.
+    ionItemLabelRange:  (_, label, attr, l, r) => ionic.Item(_, __._Parts.ionLabel(_, label), __._Parts.ionRange(_, attr, l, r)), // 에러 때문에 this -> Sat.part로 고쳤음.
+    ionItemLabelSelect: (_, label, attr, s, o) => ionic.Item(_, __._Parts.ionLabel(_, label), __._Parts.ionSelect(_, attr, s, o)),
+    ionItemLabelList:   (_, label, ...args)    => ionic.Item(_, __._Parts.ionLabel(_, label), args),
     ionSubfooterButton: (_, attr, label) => ionic.SubfooterBar(_, html.BUTTON(_, { $btnBlock: attr.id }, label)),
     Each: (_, lookup, func)         => Blaze.Each(( () => cube.lookup(_, lookup)), func),
     If:   (_, lookup, _then, _else) => Blaze.If  (( () => cube.lookup(_, lookup)), _then, _else) }))

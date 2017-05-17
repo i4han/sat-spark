@@ -1,24 +1,16 @@
 
-let c3 = require('c3')
+__.Module('web')
+.router({ defaultLayout: true })
+.head(o => ({
+    title: o.Settings.title,
+    meta: {name:"viewport", content:"width=device-width, initial-scale=1"}  }))
+.template(function() {
+    return __.CLASS('container-fluid', blaze.Include(this, 'yield'))  })
+.onRendered(o => () => {
+    console.log('rendered')
+    style$('body').set('overflow', 'scroll')  })
+.build('web')
 
-__.Module('web').router({
-    defaultLayout: true
-}).head({
-    title: Settings.title
-}).template(function() {
-    return blaze.Include(this, 'yield')
-}).build('web')
-
-__.Module('graph').properties({path:'graph', layout:'web'}  // router
-).template(() => html.P(this, __.ID('chart'))
-).onRendered(() => {
-    let chart = c3.generate({
-        bindto: '#chart',
-        data: {
-            columns: [
-                ['data1', 300, 350, 300, 0, 0, 0],
-                ['data2', 130, 100, 140, 200, 150, 50] ],
-            types: {
-                data1: 'area',
-                data2: 'area-spline' } } })
-}).build('graph')
+__.Module('blank')
+.template( function() { return blaze.Include(this, 'yield') } )
+.build('blank')
