@@ -1,0 +1,14 @@
+
+
+__.Module('chat').methods(() => ({
+    says: (id, text) => __._db.Chats.insert({ id: id, text: text }) }))
+.mongo({Chats: {}})
+.build()
+
+__.Module('main').mongo(() => ({
+    Ticker:     {publish: () => __._db.Ticker.find()},
+    Trade:      {publish: () => __._db.Trade.find()},
+    GroupOrder: {publish: () => __._db.GroupOrder.find()} }))
+
+
+__.isMeteorServer(() => __.meteorStartup(() => {}) )
