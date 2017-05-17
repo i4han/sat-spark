@@ -16,7 +16,7 @@ class Chart3 {
     constructor (name, data) {
         c3map.set(name, this)
         this.data   = data
-        this.config = in$.from({bindto: '#' + name, point: {r: 2}}).setAt('data.columns',  data)  }
+        this.config = in$({bindto: '#' + name, point: {r: 2}}).setAt('data.columns',  data)  }
     style (...a) {
         let names = {}, types = {}, keys = [], colors = {}
         a.forEach((v, i) => {
@@ -31,20 +31,17 @@ class Chart3 {
         .setAt( 'data.colors', colors )      .setAt( 'data.types',  types  )
         .setAt( 'axis.y.max', 110000 )
         .setAt( 'axis.y.min', 0 )
-        .setAt( 'axis.rotated', true )      // .setAt( 'axis.y.inverted', true )
+        .setAt( 'axis.y.padding.bottom', 0 )
         .setAt( 'axis.x.tick.centered', true )
         .setAt( 'axis.x.padding.left', 0 )
-        .setAt( 'axis.y.padding.bottom', 0 )
-        .setAt( 'size.height', 900 )
         .setAt( 'axis.x.type', 'category' )
         .setAt( 'axis.x.categories', ['0-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64', '65-69', '70-74', '75-79', '80-84', '85 over'].reverse())
+        .setAt( 'axis.rotated', true )      // .setAt( 'axis.y.inverted', true )
+        .setAt( 'size.height', 900 )
         return this }
-    show () {
-        this.c3 = c3.generate(this.config.value)  }
-    load (o) {
-        this.c3.load( { json: o, keys:{value: this.keys}, duration:0 } )  }
-    flow (row) {
-        this.c3.flow( { json: [row], keys:{value: this.keys}, duration:0 } )  }  }
+    show ()    { this.c3 = c3.generate(this.config.value) }
+    load (o)   { this.c3.load({ json: o, keys:{value: this.keys}, duration:0 })     }
+    flow (row) { this.c3.flow({ json: [row], keys:{value: this.keys}, duration:0 }) }  }
 
 
 in$.module('edmonton').router( {path:'ed2', layout:'web'} )

@@ -9,7 +9,8 @@ in$.module('map')
   , meta: [
         { name:"viewport", content:"initial-scale=1.0" }
       , { charset:'utf-8' }  ]
-  , script: { src: o.Public.google_maps_api_url + "&libraries=places&callback=init.Map" } }))
+  //, script: { src: o.Public.google_maps_api_url + "&libraries=places&callback=init.Map" } 
+}))
 .body( v=>v
     .include('map-input')
     .id('map',  v=>v.id('toggle', '<'))
@@ -23,7 +24,7 @@ in$.module('map')
   , '#toggle': {
         position: 'absolute', top: 10, right: 30, zIndex: 10 }
   , 'html, body': { height: '100%' , margin: 0 , padding: 0 } })
-.script( () => {
+/*.script( () => {
     let init = {}
     init.Map = () => {
         let map = new google.maps.Map(document.getElementById('map'), {
@@ -70,10 +71,11 @@ in$.module('map')
         Meteor.setTimeout( () => {
             map.setCenter({lat: 53.497, lng: 246.86})
             map.setZoom(13)  }, 2000)
-            $('.gm-style').append('<div id="toggle">&lg;</div>')  }  })
+            $('.gm-style').append('<div id="toggle">&lg;</div>')  }  }) */
 .build('map')
 
 in$.module('map-input')
+/*
 .script( () => {
     function autoComplete (map) {
         let input = document.getElementById('pac-input')
@@ -110,6 +112,7 @@ in$.module('map-input')
             } else {
               bounds.extend(place.geometry.location) }  })
           map.fitBounds(bounds)  })  } })
+          */
 .body( v=>v
     .class( 'form-group float-label-control'
       , v=>v.LABEL('Search title')
