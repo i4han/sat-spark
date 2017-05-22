@@ -1,5 +1,7 @@
 
-__.Module('web')
+let in$ = require('incredibles')
+
+in$.module('web')
 .router({ defaultLayout: true })
 .head(o => ({
     title: o.Settings.title,
@@ -11,6 +13,6 @@ __.Module('web')
     style$('body').set('overflow', 'scroll')  })
 .build('web')
 
-__.Module('blank')
+in$.module('blank')
 .template( function() { return blaze.Include(this, 'yield') } )
 .build('blank')
