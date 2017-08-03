@@ -20,7 +20,8 @@ __.Module('layout')
         ionic.NavView(this, blaze.Include(this, 'yield')),
         blaze.Include(this, 'tabs'))  })
 .onStartup(  o => () => {
-  style$('.bar-subfooter').set({ bottom: 48, height: 62 }) }  )
+  // style$('.bar-subfooter').set({ bottom: 48, height: 62 }) // cause @style.setProperty Error without isaac:atomic
+})
 .build()
 
 
